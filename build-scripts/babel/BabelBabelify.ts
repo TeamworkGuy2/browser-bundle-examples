@@ -1,12 +1,12 @@
 ﻿import babelify = require("babelify");
 import gulp = require("gulp");
 import gutil = require("gulp-util");
-import rename = require("gulp-rename");
 import vinylSourceStream = require("vinyl-source-stream");
 import watchify = require("watchify");
+import PathUtil = require("../PathUtil");
 import BrowserifyHelper = require("../BrowserifyHelper");
 
-var shortName = BrowserifyHelper.toShortFileName;
+var shortName = PathUtil.toShortFileName;
 
 
 module BabelBabelify {
@@ -14,7 +14,10 @@ module BabelBabelify {
     export function compileScripts(debug: boolean, verboseCompileInfo: boolean, paths: AppPaths) {
         var { dstDir, dstFile, entryFile } = paths;
 
-        var bundlerOpts = BrowserifyHelper.createOptions(Object.assign({ debug }, paths), [watchify]);
+        var bfyOpts: Browserify.Options & BrowserPack.Options = {
+            debug,
+        };
+        var bundlerOpts = BrowserifyHelper.createOptions(Object.assign(bfyOpts, paths), [watchify]);
         var bundler = BrowserifyHelper.create(bundlerOpts);
 
         bundler = bundler.transform((tr, opts) => {

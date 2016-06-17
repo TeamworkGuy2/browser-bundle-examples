@@ -3,14 +3,18 @@ var gulp = require("gulp");
 var gutil = require("gulp-util");
 var vinylSourceStream = require("vinyl-source-stream");
 var watchify = require("watchify");
+var PathUtil = require("../PathUtil");
 var BrowserifyHelper = require("../BrowserifyHelper");
 var Es6ifyLike = require("./Es6ifyLike");
-var shortName = BrowserifyHelper.toShortFileName;
+var shortName = PathUtil.toShortFileName;
 var TraceurEs6ify;
 (function (TraceurEs6ify) {
     function compileScripts(debug, verboseCompileInfo, paths) {
         var dstDir = paths.dstDir, dstFile = paths.dstFile, entryFile = paths.entryFile;
-        var bundlerOpts = BrowserifyHelper.createOptions(Object.assign({ debug: debug }, paths), [watchify]);
+        var bfyOpts = {
+            debug: debug,
+        };
+        var bundlerOpts = BrowserifyHelper.createOptions(Object.assign(bfyOpts, paths), [watchify]);
         var bundler = BrowserifyHelper.create(bundlerOpts);
         Es6ifyLike.traceurOverrides.global = true;
         // all JS files

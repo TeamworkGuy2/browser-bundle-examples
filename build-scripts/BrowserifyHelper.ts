@@ -5,18 +5,6 @@ import stream = require("stream");
 import util = require("util");
 
 module BrowserifyHelper {
-    var projectRoot: string;
-
-
-    export function setProjectRoot(projRoot: string) {
-        projectRoot = projRoot.replace(/\\/g, '/');
-    }
-
-
-    export function getProjectRoot() {
-        return projectRoot;
-    }
-
 
     export function create(opts: Browserify.Options) {
         var bundler = new browserify(opts);
@@ -24,7 +12,7 @@ module BrowserifyHelper {
     }
 
 
-    export function createOptions(opts?: AppPaths & { debug?: boolean; } & Browserify.Options, plugins?: any[]): Browserify.Options {
+    export function createOptions(opts?: AppPaths & { debug?: boolean; } & Browserify.Options & BrowserPack.Options, plugins?: any[]): Browserify.Options {
         opts = <any>Object.assign({}, opts || {});
         var res: Browserify.Options = {
             debug: opts.debug,
@@ -181,26 +169,6 @@ module BrowserifyHelper {
             if (res !== "object") { return res; }
         }
         return obj.name ? obj.name : (typeof obj === "object" ? ("keys:[" + Object.keys(obj).join(", ") + "]") : String(obj));
-    }
-
-
-    export function toShortFileName(file: string, projRoot?: string) {
-        projRoot = projRoot || (projectRoot || (projectRoot = process.cwd().replace(/\\/g, '/')));
-        var parts = file.replace(/\\/g, '/').split(projRoot);
-        return parts[parts.length - 1];
-    }
-
-
-    export function createRegexInspector(regex: RegExp, showRegexTests: boolean) {
-        if (showRegexTests) {
-            var origTest = regex.test;
-            regex.test = function testInspector(str: string) {
-                var res = origTest.call(regex, str);
-                gutil.log((res ? "building: " : "ignore: ") + toShortFileName(str));
-                return res;
-            };
-        }
-        return regex;
     }
 
 }

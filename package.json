@@ -1,6 +1,6 @@
 {
   "name": "browser-bundle-examples",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Example projects using Browserify, Traceur, gulp.js, etc. to build/bundle javascript code",
   "devDependencies": {
     "babel-core": "~6.9.1",
@@ -12,6 +12,7 @@
     "gulp": "~3.9.1",
     "gulp-util": "~3.0.7",
     "gulp-rename": "~1.2.2",
+    "node-sass": "~3.7.0",
     "through": "~2.3.8",
     "traceur": "~0.0.111",
     "vinyl-source-stream": "~1.1.0",

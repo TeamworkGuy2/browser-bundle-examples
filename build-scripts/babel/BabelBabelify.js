@@ -3,13 +3,17 @@ var babelify = require("babelify");
 var gulp = require("gulp");
 var vinylSourceStream = require("vinyl-source-stream");
 var watchify = require("watchify");
+var PathUtil = require("../PathUtil");
 var BrowserifyHelper = require("../BrowserifyHelper");
-var shortName = BrowserifyHelper.toShortFileName;
+var shortName = PathUtil.toShortFileName;
 var BabelBabelify;
 (function (BabelBabelify) {
     function compileScripts(debug, verboseCompileInfo, paths) {
         var dstDir = paths.dstDir, dstFile = paths.dstFile, entryFile = paths.entryFile;
-        var bundlerOpts = BrowserifyHelper.createOptions(Object.assign({ debug: debug }, paths), [watchify]);
+        var bfyOpts = {
+            debug: debug,
+        };
+        var bundlerOpts = BrowserifyHelper.createOptions(Object.assign(bfyOpts, paths), [watchify]);
         var bundler = BrowserifyHelper.create(bundlerOpts);
         bundler = bundler.transform(function (tr, opts) {
             console.log("babelify: '" + shortName(tr) + "'");

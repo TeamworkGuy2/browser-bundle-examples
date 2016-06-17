@@ -2,6 +2,7 @@
 /// <reference path="../definitions/gulp/gulp.d.ts" />
 /// <reference path="../definitions/gulp-rename/gulp-rename.d.ts" />
 /// <reference path="../definitions/gulp-util/gulp-util.d.ts" />
+/// <reference path="../definitions/node-sass/node-sass.d.ts" />
 /// <reference path="../definitions/through/through.d.ts" />
 /// <reference path="../definitions/vinyl-source-stream/vinyl-source-stream.d.ts" />
 /// <reference path="../definitions/custom/babelify/babelify.d.ts" />

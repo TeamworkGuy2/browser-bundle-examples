@@ -6,15 +6,6 @@ var stream = require("stream");
 var util = require("util");
 var BrowserifyHelper;
 (function (BrowserifyHelper) {
-    var projectRoot;
-    function setProjectRoot(projRoot) {
-        projectRoot = projRoot.replace(/\\/g, '/');
-    }
-    BrowserifyHelper.setProjectRoot = setProjectRoot;
-    function getProjectRoot() {
-        return projectRoot;
-    }
-    BrowserifyHelper.getProjectRoot = getProjectRoot;
     function create(opts) {
         var bundler = new browserify(opts);
         return bundler;
@@ -150,23 +141,5 @@ var BrowserifyHelper;
         return obj.name ? obj.name : (typeof obj === "object" ? ("keys:[" + Object.keys(obj).join(", ") + "]") : String(obj));
     }
     BrowserifyHelper.objName = objName;
-    function toShortFileName(file, projRoot) {
-        projRoot = projRoot || (projectRoot || (projectRoot = process.cwd().replace(/\\/g, '/')));
-        var parts = file.replace(/\\/g, '/').split(projRoot);
-        return parts[parts.length - 1];
-    }
-    BrowserifyHelper.toShortFileName = toShortFileName;
-    function createRegexInspector(regex, showRegexTests) {
-        if (showRegexTests) {
-            var origTest = regex.test;
-            regex.test = function testInspector(str) {
-                var res = origTest.call(regex, str);
-                gutil.log((res ? "building: " : "ignore: ") + toShortFileName(str));
-                return res;
-            };
-        }
-        return regex;
-    }
-    BrowserifyHelper.createRegexInspector = createRegexInspector;
 })(BrowserifyHelper || (BrowserifyHelper = {}));
 module.exports = BrowserifyHelper;

@@ -1,0 +1,15 @@
+﻿
+@mixin border-radius($radius) {
+  -webkit-border-radius: $radius;
+     -moz-border-radius: $radius;
+      -ms-border-radius: $radius;
+          border-radius: $radius;
+}
+
+@mixin background-gradient($from, $to) {
+    background: $to; /* default for browsers that do not support gradients */
+    background: -webkit-linear-gradient($from, $to); /* Safari 5.1 to 6.0 */
+    background: -o-linear-gradient($from, $to); /* Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient($from, $to); /* Firefox 3.6 to 15 */
+    background: linear-gradient($from, $to); /* CSS3 standard syntax */
+}

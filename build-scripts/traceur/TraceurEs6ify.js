@@ -1,6 +1,6 @@
 "use strict";
 var gulp = require("gulp");
-var gutil = require("gulp-util");
+var exorcist = require("exorcist");
 var vinylSourceStream = require("vinyl-source-stream");
 var watchify = require("watchify");
 var PathUtil = require("../PathUtil");
@@ -10,7 +10,7 @@ var shortName = PathUtil.toShortFileName;
 var TraceurEs6ify;
 (function (TraceurEs6ify) {
     function compileScripts(debug, verboseCompileInfo, paths) {
-        var dstDir = paths.dstDir, dstFile = paths.dstFile, entryFile = paths.entryFile;
+        var dstDir = paths.dstDir, dstMapFile = paths.dstMapFile, dstFile = paths.dstFile, entryFile = paths.entryFile;
         var bfyOpts = {
             debug: debug,
         };
@@ -19,9 +19,9 @@ var TraceurEs6ify;
         Es6ifyLike.traceurOverrides.global = true;
         // all JS files
         var es6ifyCompile = Es6ifyLike.es6ify(undefined, function (file, willProcess) {
-            gutil.log("traceur " + (willProcess ? "applied to" : "skipped") + " '" + shortName(file) + "'");
+            //console.log("traceur " + (willProcess ? "applied to" : "skipped") + " '" + shortName(file) + "'");
         }, function (file, data) {
-            gutil.log("traceur done '" + shortName(file) + "', data " + data.length + " done");
+            console.log("traceur: '" + shortName(file) + "'"); // + ", data " + data.length + " done");
         });
         bundler = bundler.transform(function (file, opts) {
             var res = es6ifyCompile(file);
@@ -30,9 +30,8 @@ var TraceurEs6ify;
         BrowserifyHelper.setupRebundleListener(dstDir + dstFile, bundler, function () {
             return bundler.bundle();
         }, [
-            //var mapFile = dstDir + "app.map.js";
+            ["extract-source-maps", function (prevSrc) { return prevSrc.pipe(exorcist(dstMapFile)); }],
             ["to-vinyl-file", function (prevSrc) { return prevSrc.pipe(vinylSourceStream(dstFile)); }],
-            //(prevSrc) => prevSrc.pipe(exorcist(mapFile)),
             //(prevSrc) => prevSrc.pipe(rename(dstFile)),
             ["write-to-dst", function (prevSrc) { return prevSrc.pipe(gulp.dest(dstDir)); }],
         ]);

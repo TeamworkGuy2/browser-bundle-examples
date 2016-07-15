@@ -1,6 +1,45 @@
+table {
+  border-collapse: collapse;
+}
+
+td {
+  border: 1px solid #888;
+  padding: 0.5em;
+}
+
+.widget {
+  background-color: #00F;
+}
+
+.widget > bubble {
+  -webkit-border-radius: 0.5em;
+  -moz-border-radius: 0.5em;
+  -ms-border-radius: 0.5em;
+  border-radius: 0.5em;
+}
+
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  background-color: #bada55;
+  height: 100%;
+  background: #FFF;
+  /* default for browsers that do not support gradients */
+  background: -webkit-linear-gradient(#77ba55, #FFF);
+  /* Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(#77ba55, #FFF);
+  /* Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(#77ba55, #FFF);
+  /* Firefox 3.6 to 15 */
+  background: linear-gradient(#77ba55, #FFF);
+  /* CSS3 standard syntax */
+}
+
+.power-grid-widget > .map-display {
+  border: 2px solid #AAA;
+  background-color: #FFF;
 }
 
 /*# sourceMappingURL=base.css.map */

@@ -1,6 +1,24 @@
-$badass: #bada55;
+
+@import "table.scss";
+@import "common-widget.scss";
+@import "blue-widget.scss";
+
+$bgColor: #77ba55;
+
+html {
+    height: 100%;
+}
 
 body { 
-  margin: 0; 
-  background-color: $badass; 
+  margin: 0;
+  height: 100%;
+  @include background-gradient($bgColor, #FFF)
+}
+
+.power-grid-widget {
+
+    > .map-display {
+        border: 2px solid #AAA;
+        background-color: #FFF;
+    }
 }

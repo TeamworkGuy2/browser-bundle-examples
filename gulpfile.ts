@@ -24,21 +24,27 @@ gulp.task("default", [], function () {
     gutil.log("{ debug: " + debug + ", verboseCompileInfo: " + verboseCompileInfo + ", process.cwd: " + process.cwd() + " }");
 
     var opts: AppPaths = {
-        entryFile: "./src/example1/SafePowerSource.js",
+        entryFile: "./src/example1/PowerGridWidget.js",
         dstDir: "./build/",
-        dstFile: "app-babel-babelify.js",
+        dstFile: null,
+        dstMapFile: null,
         srcPaths: ["node_modules", "./src/example1"],
         projectRoot: process.cwd(),
     };
 
     switch (scenarioName) {
-        case "babel-babelify":
+        case "babel":
+            opts.dstFile = "app-babel-babelify.js";
+            opts.dstMapFile = opts.dstDir + "app-babel-babelify.js.map";
             BabelBabelify.compileScripts(debug, verboseCompileInfo, opts);
             return;
-        case "traceur-es6ify":
+        case "traceur":
+            opts.dstFile = "app-traceur-es6ify.js";
+            opts.dstMapFile = opts.dstDir + "app-traceur-es6ify.js.map";
             TraceurEs6ify.compileScripts(debug, verboseCompileInfo, opts);
             return;
         case "scss":
+            opts.dstFile = "css/base.css";
             ScssSass.compileScripts(debug, verboseCompileInfo, opts);
             return;
         default:

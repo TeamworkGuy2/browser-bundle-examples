@@ -1,7 +1,7 @@
 ﻿import fs = require("fs");
 import gutil = require("gulp-util");
 import sass = require("node-sass");
-import PathUtil = require("../PathUtil");
+import LogUtil = require("../LogUtil");
 
 module ScssSass {
 
@@ -18,12 +18,12 @@ module ScssSass {
         };
         sass.render(scssOpts, (err, res) => {
             if (err) {
-                gutil.log("error compiling SCSS '" + srcFile + "': " + PathUtil.objToString(err, true, paths.projectRoot));
+                gutil.log("error compiling SCSS '" + srcFile + "': " + LogUtil.objToString(err, true, paths.projectRoot));
             }
             else {
                 fs.writeFileSync(dstFile, res.css);
                 fs.writeFileSync(dstFileMap, res.map);
-                gutil.log("compiled SCSS '" + dstFile + "': " + PathUtil.objToString(res.stats, true, paths.projectRoot));
+                gutil.log("compiled SCSS '" + dstFile + "': " + LogUtil.objToString(res.stats, true, paths.projectRoot));
             }
         });
     }

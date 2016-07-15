@@ -1,6 +1,7 @@
 ﻿import babelify = require("babelify");
 import gulp = require("gulp");
 import gutil = require("gulp-util");
+import exorcist = require("exorcist");
 import vinylSourceStream = require("vinyl-source-stream");
 import watchify = require("watchify");
 import PathUtil = require("../PathUtil");
@@ -12,7 +13,7 @@ var shortName = PathUtil.toShortFileName;
 module BabelBabelify {
 
     export function compileScripts(debug: boolean, verboseCompileInfo: boolean, paths: AppPaths) {
-        var { dstDir, dstFile, entryFile } = paths;
+        var { dstDir, dstFile, dstMapFile, entryFile } = paths;
 
         var bfyOpts: Browserify.Options & BrowserPack.Options = {
             debug,
@@ -31,9 +32,8 @@ module BabelBabelify {
         BrowserifyHelper.setupRebundleListener(dstDir + dstFile, bundler, () => {
             return bundler.bundle();
         }, [
-            //var mapFile = dstDir + "app.map.js";
+            ["extract-source-maps", (prevSrc) => prevSrc.pipe(exorcist(dstMapFile))],
             ["to-vinyl-file", (prevSrc) => prevSrc.pipe(vinylSourceStream(dstFile))],
-            //(prevSrc) => prevSrc.pipe(exorcist(mapFile)),
             //(prevSrc) => prevSrc.pipe(rename(dstFile)),
             ["write-to-dst", (prevSrc) => prevSrc.pipe(gulp.dest(dstDir))],
         ]);

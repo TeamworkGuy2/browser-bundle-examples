@@ -2,7 +2,8 @@
 var crypto = require("crypto");
 var traceur = require("traceur");
 var through = require("through");
-/** Modified version of es6ify to work with latest version of traceur and TypeScript
+/** Modified version of es6ify
+ * Works with latest version of traceur and TypeScript
  */
 var Es6ifyLike;
 (function (Es6ifyLike) {
@@ -19,8 +20,7 @@ var Es6ifyLike;
      * @return {string} compiled source
      */
     function compileFile(file, src) {
-        var compiled;
-        compiled = compile(file, src, Es6ifyLike.traceurOverrides);
+        var compiled = compile(file, src, Es6ifyLike.traceurOverrides);
         if (compiled.error) {
             throw new Error(compiled.error);
         }

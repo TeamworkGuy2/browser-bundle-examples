@@ -2,7 +2,7 @@
 var fs = require("fs");
 var gutil = require("gulp-util");
 var sass = require("node-sass");
-var PathUtil = require("../PathUtil");
+var LogUtil = require("../LogUtil");
 var ScssSass;
 (function (ScssSass) {
     function compileScripts(debug, verboseCompileInfo, paths) {
@@ -18,12 +18,12 @@ var ScssSass;
         };
         sass.render(scssOpts, function (err, res) {
             if (err) {
-                gutil.log("error compiling SCSS '" + srcFile + "': " + PathUtil.objToString(err, true, paths.projectRoot));
+                gutil.log("error compiling SCSS '" + srcFile + "': " + LogUtil.objToString(err, true, paths.projectRoot));
             }
             else {
                 fs.writeFileSync(dstFile, res.css);
                 fs.writeFileSync(dstFileMap, res.map);
-                gutil.log("compiled SCSS '" + dstFile + "': " + PathUtil.objToString(res.stats, true, paths.projectRoot));
+                gutil.log("compiled SCSS '" + dstFile + "': " + LogUtil.objToString(res.stats, true, paths.projectRoot));
             }
         });
     }

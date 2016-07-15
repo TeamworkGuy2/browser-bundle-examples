@@ -1,0 +1,11 @@
+﻿
+@import "common-widget.scss";
+
+.widget {
+    background-color: #F00;
+
+    > bubble {
+        @include border-radius(0.5em);
+    }
+
+}

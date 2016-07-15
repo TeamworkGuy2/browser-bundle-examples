@@ -3,7 +3,8 @@ import path = require("path");
 import traceur = require("traceur");
 import through = require("through");
 
-/** Modified version of es6ify to work with latest version of traceur and TypeScript
+/** Modified version of es6ify
+ * Works with latest version of traceur and TypeScript
  */
 module Es6ifyLike {
 
@@ -26,8 +27,7 @@ module Es6ifyLike {
      * @return {string} compiled source
      */
     export function compileFile(file: string, src: string): string {
-        var compiled;
-        compiled = compile(file, src, traceurOverrides);
+        var compiled = compile(file, src, traceurOverrides);
 
         if (compiled.error) {
             throw new Error(compiled.error);

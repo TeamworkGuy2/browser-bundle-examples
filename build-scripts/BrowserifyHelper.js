@@ -4,6 +4,7 @@ var browserify = require("browserify");
 var browserPack = require("browser-pack");
 var stream = require("stream");
 var util = require("util");
+var LogUtil = require("./LogUtil");
 var BrowserifyHelper;
 (function (BrowserifyHelper) {
     function create(opts) {
@@ -38,7 +39,7 @@ var BrowserifyHelper;
             var endTime;
             function startCb(stream) {
                 startTime = Date.now();
-                gutil.log("start building '" + dstFilePath + "' with (" + objName(stream) + ")...");
+                gutil.log("start building '" + dstFilePath + "' with (" + LogUtil.objName(stream) + ")...");
             }
             function doneCb() {
                 endTime = Date.now();
@@ -113,33 +114,5 @@ var BrowserifyHelper;
         return new SimpleStreamView();
     }
     BrowserifyHelper.createStreamTransformer = createStreamTransformer;
-    /** Best attempt to get a descriptive name from an object, first by checking the object's .constructor, then .prototype, then .name, various Object.prototype.toString.call() permutations,
-     * and eventually Object.keys().
-     * If the object is not an object, String() is used
-     * @param obj
-     */
-    function objName(obj) {
-        if (!obj) {
-            return String(obj);
-        }
-        var toStr = Object.prototype.toString;
-        if (typeof obj !== "object" && typeof obj !== "function") {
-            return String(obj);
-        }
-        if (obj.constructor) {
-            var res = (obj.constructor ? obj.constructor.name : toStr.call(obj.constructor));
-            if (res !== "object") {
-                return res;
-            }
-        }
-        if (obj.prototype) {
-            var res = (obj.prototype.constructor ? obj.prototype.constructor.name : (obj.prototype.name ? obj.prototype.name : toStr.call(obj.prototype)));
-            if (res !== "object") {
-                return res;
-            }
-        }
-        return obj.name ? obj.name : (typeof obj === "object" ? ("keys:[" + Object.keys(obj).join(", ") + "]") : String(obj));
-    }
-    BrowserifyHelper.objName = objName;
 })(BrowserifyHelper || (BrowserifyHelper = {}));
 module.exports = BrowserifyHelper;

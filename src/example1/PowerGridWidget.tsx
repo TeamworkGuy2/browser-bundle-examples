@@ -7,7 +7,7 @@ type Grid = PowerGridWidgetHelper.Grid;
 
 
 module PowerGridWidget {
-    var dotColor = "#59A";
+    var dotColor = "#5C4";
 
 
     export function addSvgMap(doc: Document, container: Element, relays: PowerRelay.Relay[], junctions: PowerRelay.Junction[], gs: Grid) {
@@ -47,7 +47,7 @@ module PowerGridWidget {
     var doc = window.document;
 
     PowerGridWidgetHelper.onReady(doc, () => {
-        var gridUi = PowerGridWidgetHelper.newInst(doc, doc.getElementsByClassName("power-grid-widget")[0], { mapName: "defaultMap1" }, PowerGridWidget.addSvgMap);
+        var gridUi = PowerGridWidgetHelper.newInst(doc, doc.getElementsByClassName("power-grid-widget")[0], { mapName: "hds" }, PowerGridWidget.addSvgMap);
     });
 } ());
 

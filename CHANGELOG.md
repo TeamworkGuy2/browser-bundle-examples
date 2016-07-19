@@ -2,8 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project does its best to adhere to [Semantic Versioning](http://semver.org/).
 
+
 --------
-### [0.3.0](N/A) - 2016-07-13
+### [0.3.1](N/A) - 2016-07-19
+#### Changed
+Few minor changes to prep the project for live demo of build process using PowerGridWidget.js and then switching to PowerGridWidget.jsx
+
+
+--------
+### [0.3.0](https://github.com/TeamworkGuy2/browser-bundle-examples/commit/358a26013afbda1cf66121dd735f2414deb13924) - 2016-07-14
 #### Added
 * pages/power-grid.xhtml
 * Added utils: FileUtil, LogUtil, StringUtil, TypeScriptUtil

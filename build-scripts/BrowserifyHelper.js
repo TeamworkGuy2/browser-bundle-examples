@@ -4,7 +4,6 @@ var browserify = require("browserify");
 var browserPack = require("browser-pack");
 var stream = require("stream");
 var util = require("util");
-var LogUtil = require("./LogUtil");
 var BrowserifyHelper;
 (function (BrowserifyHelper) {
     function create(opts) {
@@ -39,7 +38,7 @@ var BrowserifyHelper;
             var endTime;
             function startCb(stream) {
                 startTime = Date.now();
-                gutil.log("start building '" + dstFilePath + "' with (" + LogUtil.objName(stream) + ")...");
+                gutil.log("start building '" + dstFilePath + "'");
             }
             function doneCb() {
                 endTime = Date.now();

@@ -4,7 +4,7 @@ var ReactDom = require("react-dom");
 var PowerGridWidgetHelper = require("./PowerGridWidgetHelper");
 var PowerGridWidget;
 (function (PowerGridWidget) {
-    var dotColor = "#59A";
+    var dotColor = "#5C4";
     function addSvgMap(doc, container, relays, junctions, gs) {
         var res = [];
         for (var i = 0, size = relays.length; i < size; i++) {
@@ -35,7 +35,7 @@ var PowerGridWidget;
 (function main() {
     var doc = window.document;
     PowerGridWidgetHelper.onReady(doc, function () {
-        var gridUi = PowerGridWidgetHelper.newInst(doc, doc.getElementsByClassName("power-grid-widget")[0], { mapName: "defaultMap1" }, PowerGridWidget.addSvgMap);
+        var gridUi = PowerGridWidgetHelper.newInst(doc, doc.getElementsByClassName("power-grid-widget")[0], { mapName: "hds" }, PowerGridWidget.addSvgMap);
     });
 }());
 module.exports = PowerGridWidget;

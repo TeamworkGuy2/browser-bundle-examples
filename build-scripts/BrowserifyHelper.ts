@@ -44,7 +44,7 @@ module BrowserifyHelper {
 
             function startCb(stream) {
                 startTime = Date.now();
-                gutil.log("start building '" + dstFilePath + "' with (" + LogUtil.objName(stream) + ")...");
+                gutil.log("start building '" + dstFilePath + "'");
             }
 
             function doneCb() {

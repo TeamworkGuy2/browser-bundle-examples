@@ -26,7 +26,7 @@ module BabelBabelify {
 
             return babelify(tr, opts);
         }, {
-            presets: ["es2015", "react"],
+            presets: ["es2015"],
         });
 
         BrowserifyHelper.setupRebundleListener(dstDir + dstFile, bundler, () => {

@@ -20,7 +20,7 @@ var BabelBabelify;
             console.log("babelify: '" + shortName(tr) + "'");
             return babelify(tr, opts);
         }, {
-            presets: ["es2015", "react"],
+            presets: ["es2015"],
         });
         BrowserifyHelper.setupRebundleListener(dstDir + dstFile, bundler, function () {
             return bundler.bundle();

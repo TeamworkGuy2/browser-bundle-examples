@@ -29,694 +29,345 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var require = (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
+/** Utilities for 2-dimensional array iteration */
 var ForEachUtil;
-(function(ForEachUtil) {
-  var dirDown = 1;
-  var dirDownLeft = 2;
-  var dirLeft = 4;
-  var dirUpLeft = 8;
-  var dirUp = 16;
-  var dirUpRight = 32;
-  var dirRight = 64;
-  var dirDownRight = 128;
-  function forEachDirection(x, z, xCount, zCount, dirHandlers, ignoreBehindPoints, xPrev, zPrev) {
-    if (x === xPrev && z === zPrev) {
-      throw new Error("cannot determine direction since x,z and xPrev,zPrev are the same");
+(function (ForEachUtil) {
+    var dirDown = 1;
+    var dirDownLeft = 2;
+    var dirLeft = 4;
+    var dirUpLeft = 8;
+    var dirUp = 16;
+    var dirUpRight = 32;
+    var dirRight = 64;
+    var dirDownRight = 128;
+    /** Given a point on a grid of given size and handlers for 8 directions (horizontal, vertical, diagonal),
+     * call the directional handlers for adjacent cells which are still within grid bounds.
+     * @param x the 0-based X position of the point being checked
+     * @param z the 0-based Z position of the point being checked
+     * @param xCount the exclusive width (X) size of the grid
+     * @param zCount the exclusive depth (Z) size of the grid
+     * @param dirHandlers the map associating directions with handler functions (all properties must not be null)
+     * @param ignoreBehindPoints ignore the 3 points in the direction away from a line draw from 'xPrev,zPrev' to 'x,z'
+     * @return the first handler return value other than undefined (handlers are called based on the above described criteria)
+     */
+    function forEachDirection(x, z, xCount, zCount, dirHandlers, ignoreBehindPoints, xPrev, zPrev) {
+        if (x === xPrev && z === zPrev) {
+            throw new Error("cannot determine direction since x,z and xPrev,zPrev are the same");
+        }
+        var dir = z === zPrev ? (x < xPrev ? dirLeft : dirRight /*left or right*/) :
+            (z > zPrev ?
+                (x > xPrev ? dirDownRight : (x === xPrev ? dirDown : dirDownLeft)) /*down-ish*/ :
+                (x > xPrev ? dirUpRight : (x === xPrev ? dirUp : dirUpLeft)) /*up-ish*/);
+        var ignore = ignoreBehindPoints;
+        var ignoreTop = ignore ? (dir === dirDownRight || dir === dirDown || dir === dirDownLeft) : false;
+        var ignoreTopRight = ignore ? (dir === dirDown || dir === dirDownLeft || dir === dirLeft) : false;
+        var ignoreRight = ignore ? (dir === dirDownLeft || dir === dirLeft || dir === dirUpLeft) : false;
+        var ignoreBottomRight = ignore ? (dir === dirLeft || dir === dirUpLeft || dir === dirUp) : false;
+        var ignoreBottom = ignore ? (dir === dirUpLeft || dir === dirUp || dir === dirUpRight) : false;
+        var ignoreBottomLeft = ignore ? (dir === dirUp || dir === dirUpRight || dir === dirRight) : false;
+        var ignoreLeft = ignore ? (dir === dirUpRight || dir === dirRight || dir === dirDownRight) : false;
+        var ignoreTopLeft = ignore ? (dir === dirRight || dir === dirDownRight || dir === dirDown) : false;
+        var topLeftRan = false;
+        var topRightRan = false;
+        var bottomLeftRan = false;
+        var bottomRightRan = false;
+        if (x > 0) {
+            if (z > 0) {
+                // = = .
+                // = + .
+                // . . .
+                if (!ignoreLeft) {
+                    var res = dirHandlers.left(x - 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTopLeft) {
+                    var res = dirHandlers.topLeft(x - 1, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTop) {
+                    var res = dirHandlers.top(x, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                topLeftRan = true;
+            }
+            if (z < zCount - 1) {
+                // . = =
+                // . + =
+                // . . .
+                if (!ignoreTop && !topLeftRan) {
+                    var res = dirHandlers.top(x, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTopRight) {
+                    var res = dirHandlers.topRight(x + 1, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreRight) {
+                    var res = dirHandlers.right(x + 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                topRightRan = true;
+            }
+        }
+        if (x < xCount - 1) {
+            if (z > 0) {
+                // . . .
+                // = + .
+                // = = .
+                if (!ignoreBottom) {
+                    var res = dirHandlers.bottom(x, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreBottomLeft) {
+                    var res = dirHandlers.bottomLeft(x - 1, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreLeft && !topLeftRan) {
+                    var res = dirHandlers.left(x - 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                bottomLeftRan = true;
+            }
+            if (z < zCount - 1) {
+                // . . .
+                // . + =
+                // . = =
+                if (!ignoreBottom && !bottomLeftRan) {
+                    var res = dirHandlers.bottom(x, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreBottomRight) {
+                    var res = dirHandlers.bottomRight(x + 1, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreRight && !topRightRan) {
+                    var res = dirHandlers.right(x + 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                bottomRightRan = true;
+            }
+        }
+        return undefined;
     }
-    var dir = z === zPrev ? (x < xPrev ? dirLeft : dirRight) : (z > zPrev ? (x > xPrev ? dirDownRight : (x === xPrev ? dirDown : dirDownLeft)) : (x > xPrev ? dirUpRight : (x === xPrev ? dirUp : dirUpLeft)));
-    var ignore = ignoreBehindPoints;
-    var ignoreTop = ignore ? (dir === dirDownRight || dir === dirDown || dir === dirDownLeft) : false;
-    var ignoreTopRight = ignore ? (dir === dirDown || dir === dirDownLeft || dir === dirLeft) : false;
-    var ignoreRight = ignore ? (dir === dirDownLeft || dir === dirLeft || dir === dirUpLeft) : false;
-    var ignoreBottomRight = ignore ? (dir === dirLeft || dir === dirUpLeft || dir === dirUp) : false;
-    var ignoreBottom = ignore ? (dir === dirUpLeft || dir === dirUp || dir === dirUpRight) : false;
-    var ignoreBottomLeft = ignore ? (dir === dirUp || dir === dirUpRight || dir === dirRight) : false;
-    var ignoreLeft = ignore ? (dir === dirUpRight || dir === dirRight || dir === dirDownRight) : false;
-    var ignoreTopLeft = ignore ? (dir === dirRight || dir === dirDownRight || dir === dirDown) : false;
-    var topLeftRan = false;
-    var topRightRan = false;
-    var bottomLeftRan = false;
-    var bottomRightRan = false;
-    if (x > 0) {
-      if (z > 0) {
-        if (!ignoreLeft) {
-          var res = dirHandlers.left(x - 1, z);
-          if (res != null) {
-            return res;
-          }
+    ForEachUtil.forEachDirection = forEachDirection;
+    /** Given a point on a grid of given size and handlers for 8 directions (horizontal, vertical, diagonal),
+     * call the directional handlers for adjacent cells which are still within grid bounds.
+     * @param x the 0-based X position of the point being checked
+     * @param z the 0-based Z position of the point being checked
+     * @param xCount the exclusive width (X) size of the grid
+     * @param zCount the exclusive depth (Z) size of the grid
+     * @param dirHandlers the map associating directions with handler functions (all properties must not be null)
+     * @param ignoreBehindPoints ignore the 3 points in the direction away from a line draw from 'xPrev,zPrev' to 'x,z'
+     * @return the first handler return value other than undefined (handlers are called based on the above described criteria)
+     */
+    function forEachDirectionConsume(x, z, xCount, zCount, dirHandler, ignoreBehindPoints, xPrev, zPrev) {
+        if (x === xPrev && z === zPrev) {
+            throw new Error("cannot determine direction since x,z and xPrev,zPrev are the same");
         }
-        if (!ignoreTopLeft) {
-          var res = dirHandlers.topLeft(x - 1, z - 1);
-          if (res != null) {
-            return res;
-          }
+        var dir = z === zPrev ? (x < xPrev ? dirLeft : dirRight /*left or right*/) :
+            (z > zPrev ?
+                (x > xPrev ? dirDownRight : (x === xPrev ? dirDown : dirDownLeft)) /*down-ish*/ :
+                (x > xPrev ? dirUpRight : (x === xPrev ? dirUp : dirUpLeft)) /*up-ish*/);
+        var ignore = ignoreBehindPoints;
+        var ignoreTop = ignore ? (dir === dirDownRight || dir === dirDown || dir === dirDownLeft) : false;
+        var ignoreTopRight = ignore ? (dir === dirDown || dir === dirDownLeft || dir === dirLeft) : false;
+        var ignoreRight = ignore ? (dir === dirDownLeft || dir === dirLeft || dir === dirUpLeft) : false;
+        var ignoreBottomRight = ignore ? (dir === dirLeft || dir === dirUpLeft || dir === dirUp) : false;
+        var ignoreBottom = ignore ? (dir === dirUpLeft || dir === dirUp || dir === dirUpRight) : false;
+        var ignoreBottomLeft = ignore ? (dir === dirUp || dir === dirUpRight || dir === dirRight) : false;
+        var ignoreLeft = ignore ? (dir === dirUpRight || dir === dirRight || dir === dirDownRight) : false;
+        var ignoreTopLeft = ignore ? (dir === dirRight || dir === dirDownRight || dir === dirDown) : false;
+        var topLeftRan = false;
+        var topRightRan = false;
+        var bottomLeftRan = false;
+        var bottomRightRan = false;
+        if (x > 0) {
+            if (z > 0) {
+                // = = .
+                // = + .
+                // . . .
+                if (!ignoreLeft) {
+                    var res = dirHandler(x - 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTopLeft) {
+                    var res = dirHandler(x - 1, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTop) {
+                    var res = dirHandler(x, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                topLeftRan = true;
+            }
+            if (z < zCount - 1) {
+                // . = =
+                // . + =
+                // . . .
+                if (!ignoreTop && !topLeftRan) {
+                    var res = dirHandler(x, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTopRight) {
+                    var res = dirHandler(x + 1, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreRight) {
+                    var res = dirHandler(x + 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                topRightRan = true;
+            }
         }
-        if (!ignoreTop) {
-          var res = dirHandlers.top(x, z - 1);
-          if (res != null) {
-            return res;
-          }
+        if (x < xCount - 1) {
+            if (z > 0) {
+                // . . .
+                // = + .
+                // = = .
+                if (!ignoreBottom) {
+                    var res = dirHandler(x, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreBottomLeft) {
+                    var res = dirHandler(x - 1, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreLeft && !topLeftRan) {
+                    var res = dirHandler(x - 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                bottomLeftRan = true;
+            }
+            if (z < zCount - 1) {
+                // . . .
+                // . + =
+                // . = =
+                if (!ignoreBottom && !bottomLeftRan) {
+                    var res = dirHandler(x, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreBottomRight) {
+                    var res = dirHandler(x + 1, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreRight && !topRightRan) {
+                    var res = dirHandler(x + 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                bottomRightRan = true;
+            }
         }
-        topLeftRan = true;
-      }
-      if (z < zCount - 1) {
-        if (!ignoreTop && !topLeftRan) {
-          var res = dirHandlers.top(x, z - 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreTopRight) {
-          var res = dirHandlers.topRight(x + 1, z - 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreRight) {
-          var res = dirHandlers.right(x + 1, z);
-          if (res != null) {
-            return res;
-          }
-        }
-        topRightRan = true;
-      }
+        return undefined;
     }
-    if (x < xCount - 1) {
-      if (z > 0) {
-        if (!ignoreBottom) {
-          var res = dirHandlers.bottom(x, z + 1);
-          if (res != null) {
-            return res;
-          }
+    ForEachUtil.forEachDirectionConsume = forEachDirectionConsume;
+    function forEach2d(tArys, func) {
+        for (var i1 = 0, size1 = tArys.length; i1 < size1; i1++) {
+            var ts = tArys[i1];
+            for (var i2 = 0, size2 = ts.length; i2 < size2; i2++) {
+                func(ts[i2], i1, i2, ts, tArys);
+            }
         }
-        if (!ignoreBottomLeft) {
-          var res = dirHandlers.bottomLeft(x - 1, z + 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreLeft && !topLeftRan) {
-          var res = dirHandlers.left(x - 1, z);
-          if (res != null) {
-            return res;
-          }
-        }
-        bottomLeftRan = true;
-      }
-      if (z < zCount - 1) {
-        if (!ignoreBottom && !bottomLeftRan) {
-          var res = dirHandlers.bottom(x, z + 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreBottomRight) {
-          var res = dirHandlers.bottomRight(x + 1, z + 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreRight && !topRightRan) {
-          var res = dirHandlers.right(x + 1, z);
-          if (res != null) {
-            return res;
-          }
-        }
-        bottomRightRan = true;
-      }
     }
-    return undefined;
-  }
-  ForEachUtil.forEachDirection = forEachDirection;
-  function forEachDirectionConsume(x, z, xCount, zCount, dirHandler, ignoreBehindPoints, xPrev, zPrev) {
-    if (x === xPrev && z === zPrev) {
-      throw new Error("cannot determine direction since x,z and xPrev,zPrev are the same");
-    }
-    var dir = z === zPrev ? (x < xPrev ? dirLeft : dirRight) : (z > zPrev ? (x > xPrev ? dirDownRight : (x === xPrev ? dirDown : dirDownLeft)) : (x > xPrev ? dirUpRight : (x === xPrev ? dirUp : dirUpLeft)));
-    var ignore = ignoreBehindPoints;
-    var ignoreTop = ignore ? (dir === dirDownRight || dir === dirDown || dir === dirDownLeft) : false;
-    var ignoreTopRight = ignore ? (dir === dirDown || dir === dirDownLeft || dir === dirLeft) : false;
-    var ignoreRight = ignore ? (dir === dirDownLeft || dir === dirLeft || dir === dirUpLeft) : false;
-    var ignoreBottomRight = ignore ? (dir === dirLeft || dir === dirUpLeft || dir === dirUp) : false;
-    var ignoreBottom = ignore ? (dir === dirUpLeft || dir === dirUp || dir === dirUpRight) : false;
-    var ignoreBottomLeft = ignore ? (dir === dirUp || dir === dirUpRight || dir === dirRight) : false;
-    var ignoreLeft = ignore ? (dir === dirUpRight || dir === dirRight || dir === dirDownRight) : false;
-    var ignoreTopLeft = ignore ? (dir === dirRight || dir === dirDownRight || dir === dirDown) : false;
-    var topLeftRan = false;
-    var topRightRan = false;
-    var bottomLeftRan = false;
-    var bottomRightRan = false;
-    if (x > 0) {
-      if (z > 0) {
-        if (!ignoreLeft) {
-          var res = dirHandler(x - 1, z);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreTopLeft) {
-          var res = dirHandler(x - 1, z - 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreTop) {
-          var res = dirHandler(x, z - 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        topLeftRan = true;
-      }
-      if (z < zCount - 1) {
-        if (!ignoreTop && !topLeftRan) {
-          var res = dirHandler(x, z - 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreTopRight) {
-          var res = dirHandler(x + 1, z - 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreRight) {
-          var res = dirHandler(x + 1, z);
-          if (res != null) {
-            return res;
-          }
-        }
-        topRightRan = true;
-      }
-    }
-    if (x < xCount - 1) {
-      if (z > 0) {
-        if (!ignoreBottom) {
-          var res = dirHandler(x, z + 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreBottomLeft) {
-          var res = dirHandler(x - 1, z + 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreLeft && !topLeftRan) {
-          var res = dirHandler(x - 1, z);
-          if (res != null) {
-            return res;
-          }
-        }
-        bottomLeftRan = true;
-      }
-      if (z < zCount - 1) {
-        if (!ignoreBottom && !bottomLeftRan) {
-          var res = dirHandler(x, z + 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreBottomRight) {
-          var res = dirHandler(x + 1, z + 1);
-          if (res != null) {
-            return res;
-          }
-        }
-        if (!ignoreRight && !topRightRan) {
-          var res = dirHandler(x + 1, z);
-          if (res != null) {
-            return res;
-          }
-        }
-        bottomRightRan = true;
-      }
-    }
-    return undefined;
-  }
-  ForEachUtil.forEachDirectionConsume = forEachDirectionConsume;
-  function forEach2d(tArys, func) {
-    for (var i1 = 0,
-        size1 = tArys.length; i1 < size1; i1++) {
-      var ts = tArys[i1];
-      for (var i2 = 0,
-          size2 = ts.length; i2 < size2; i2++) {
-        func(ts[i2], i1, i2, ts, tArys);
-      }
-    }
-  }
-  ForEachUtil.forEach2d = forEach2d;
+    ForEachUtil.forEach2d = forEach2d;
 })(ForEachUtil || (ForEachUtil = {}));
 module.exports = ForEachUtil;
 
+},{}],6:[function(require,module,exports){
+(function (global){
+'use strict';
 
-},{}],2:[function(require,module,exports){
-"use strict";
-var PowerRelay = require("./PowerRelay");
-var Junction = PowerRelay.Junction;
-var Relay = PowerRelay.Relay;
-var PowerGrid = (function() {
-  function PowerGrid() {}
-  PowerGrid.prototype.createPowerGrid = function(map) {
-    var diagramParts = PowerRelay.diagramToJunctionRelays(0, map);
-    this.junctions = diagramParts.junctions;
-    this.relays = diagramParts.relays;
-    this.junctionCache = Junction.toMap(diagramParts.junctions);
-    this.relayCache = Relay.toMap(diagramParts.relays);
-    return diagramParts.size;
-  };
-  PowerGrid.prototype.createJunctionsGrid = function(map) {
-    var jncs = map.reduce(function(m, ln, z) {
-      ln.split("").forEach(function(s, x) {
-        if (s === "+") {
-          var jnc = {
-            junctionId: null,
-            location: {
-              x: x,
-              y: 0,
-              z: z
-            }
-          };
-          jnc.junctionId = PowerRelay.Junction.getJunctionId(jnc);
-          m.push(jnc);
-        }
-      });
-      return m;
-    }, []);
-    this.junctions = jncs;
-    this.junctionCache = Junction.toMap(jncs);
-    return {
-      width: map[0].length,
-      height: map.length
-    };
-  };
-  PowerGrid.prototype.getJunction = function(id) {
-    return this.junctionCache[id];
-  };
-  PowerGrid.prototype.getRelay = function(id) {
-    return this.relayCache[id];
-  };
-  PowerGrid.maps = {
-    defaultMap1: ["                                                                                ", "                                                                                ", "        +                                        +                         +    ", "       /                                         |                        /     ", "      /                 +--------+---------------+                       +      ", "     |                 /         |               |                       |      ", "     +                +          |               +-----------+-----------+      ", "     |                           |                                       |      ", "     +---------------------------+                                       |      ", "                                             +--\\                        |      ", "                                                 +-----------------------+      ", "                       +-------------------------+                              ", "                      /                          |                              ", "                     +                           +                              ", "                                                                                ", "                                                                                "],
-    hds: ["                                                                                ", "                                                                                ", "    +       +      +  +  +           + + + + +                                  ", "                                                                                ", "    +       +      +       +       +                                            ", "                                                                                ", "    +       +      +         +     +                                            ", "                                                                                ", "    + + + + +      +         +       + + + +                                    ", "                                                                                ", "    +       +      +         +               +                                  ", "                                                                                ", "    +       +      +       +                 +                                  ", "                                                                                ", "    +       +      +  +  +         + + + + +                                    ", "                                                                                "]
-  };
-  return PowerGrid;
-}());
-module.exports = PowerGrid;
+// compare and isBuffer taken from https://github.com/feross/buffer/blob/680e9e5e488f22aac27599a57dc844a6315928dd/index.js
+// original notice:
 
+/*!
+ * The buffer module from node.js, for the browser.
+ *
+ * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @license  MIT
+ */
+function compare(a, b) {
+  if (a === b) {
+    return 0;
+  }
 
-},{"./PowerRelay":5}],3:[function(require,module,exports){
-"use strict";
-var PowerGridWidgetHelper = require("./PowerGridWidgetHelper");
-var PowerGridWidget;
-(function(PowerGridWidget) {
-  var dotColor = "#C44";
-  function addSvgMap(doc, container, grid, gs) {
-    var junctions = grid.junctions || [];
-    var relays = grid.relays || [];
-    for (var i = 0,
-        size = junctions.length; i < size; i++) {
-      var junctionElem = createJunctionUi(doc, junctions[i].location, grid, gs);
-      container.appendChild(junctionElem);
-    }
-    for (var i = 0,
-        size = relays.length; i < size; i++) {
-      var relayElem = createRelayUi(doc, relays[i], grid, gs);
-      container.appendChild(relayElem);
-    }
-  }
-  PowerGridWidget.addSvgMap = addSvgMap;
-  function createJunctionUi(doc, point, pg, gs) {
-    var x = gs.xSize * (point.x + 0.5);
-    var z = gs.zSize * (point.z + 0.5);
-    var elem = doc.createElementNS("http://www.w3.org/2000/svg", "circle");
-    elem.setAttributeNS(null, "r", 4 + '');
-    elem.setAttributeNS(null, "stroke", "#555");
-    elem.setAttributeNS(null, "stroke-width", 2 + '');
-    elem.setAttributeNS(null, "fill", dotColor);
-    elem.setAttributeNS(null, "cx", x + '');
-    elem.setAttributeNS(null, "cy", z + '');
-    return elem;
-  }
-  PowerGridWidget.createJunctionUi = createJunctionUi;
-  function createRelayUi(doc, relay, pg, gs) {
-    var pointsAttr = PowerGridWidgetHelper.relayToSvgPointsAttr(relay, pg, gs);
-    var elem = doc.createElementNS("http://www.w3.org/2000/svg", "polyline");
-    elem.setAttributeNS(null, "stroke", "#555");
-    elem.setAttributeNS(null, "fill", "none");
-    elem.setAttributeNS(null, "stroke-width", 2 + '');
-    elem.setAttributeNS(null, "points", pointsAttr);
-    return elem;
-  }
-  PowerGridWidget.createRelayUi = createRelayUi;
-})(PowerGridWidget || (PowerGridWidget = {}));
-(function main() {
-  var doc = window.document;
-  PowerGridWidgetHelper.onReady(doc, function() {
-    var gridUi = PowerGridWidgetHelper.newInst(doc, doc.getElementsByClassName("power-grid-widget")[0], {mapName: "defaultMap1"}, PowerGridWidget.addSvgMap);
-  });
-}());
-module.exports = PowerGridWidget;
+  var x = a.length;
+  var y = b.length;
 
+  for (var i = 0, len = Math.min(x, y); i < len; ++i) {
+    if (a[i] !== b[i]) {
+      x = a[i];
+      y = b[i];
+      break;
+    }
+  }
 
-},{"./PowerGridWidgetHelper":4}],4:[function(require,module,exports){
-"use strict";
-var PowerGrid = require("./PowerGrid");
-var PowerGridWidgetHelper;
-(function(PowerGridWidgetHelper) {
-  function newInst(doc, container, settings, buildSvgFunc) {
-    var map = PowerGrid.maps[settings.mapName];
-    var grid = new PowerGrid();
-    var size = grid.createPowerGrid(map);
-    var gs = {
-      xCount: size.width,
-      zCount: size.height,
-      xSize: 10,
-      zSize: 10
-    };
-    var svgContainer = container.getElementsByClassName("map-display")[0];
-    buildSvgFunc(doc, svgContainer, grid, gs);
+  if (x < y) {
+    return -1;
   }
-  PowerGridWidgetHelper.newInst = newInst;
-  function relayToSvgPointsAttr(relay, pg, gs) {
-    var pointToPx = function(p) {
-      return (gs.xSize * (p.x + 0.5)) + ',' + (gs.zSize * (p.z + 0.5));
-    };
-    var points = relay.path.map(pointToPx);
-    var srcJnc = pg.getJunction(relay.srcJunctionId);
-    points.unshift(pointToPx(srcJnc.location));
-    var dstJnc = pg.getJunction(relay.dstJunctionId);
-    points.push(pointToPx(dstJnc.location));
-    return points.join(" ");
+  if (y < x) {
+    return 1;
   }
-  PowerGridWidgetHelper.relayToSvgPointsAttr = relayToSvgPointsAttr;
-  function onReady(document, func) {
-    if (typeof document === "function") {
-      func = document;
-      document = undefined;
-    }
-    var doc = document || window.document;
-    function ready(func) {
-      if (doc.readyState !== "loading") {
-        func();
-      } else {
-        doc.addEventListener("DOMContentLoaded", func);
-      }
-    }
-    ready(func);
+  return 0;
+}
+function isBuffer(b) {
+  if (global.Buffer && typeof global.Buffer.isBuffer === 'function') {
+    return global.Buffer.isBuffer(b);
   }
-  PowerGridWidgetHelper.onReady = onReady;
-})(PowerGridWidgetHelper || (PowerGridWidgetHelper = {}));
-module.exports = PowerGridWidgetHelper;
+  return !!(b != null && b._isBuffer);
+}
 
+// based on node assert, original notice:
 
-},{"./PowerGrid":2}],5:[function(require,module,exports){
-"use strict";
-var assert = require("assert");
-var ForEachUtil = require("../ForEachUtil");
-var PowerRelay;
-(function(PowerRelay) {
-  var PowerRating;
-  (function(PowerRating) {
-    function getPowerRating() {
-      return {
-        maxPower: 271,
-        safeOperatePower: 139,
-        standbyPower: 43
-      };
-    }
-    PowerRating.getPowerRating = getPowerRating;
-  })(PowerRating = PowerRelay.PowerRating || (PowerRelay.PowerRating = {}));
-  var Pwr;
-  (function(Pwr) {
-    function fromElectric(volts, amps) {
-      return (volts * amps);
-    }
-    Pwr.fromElectric = fromElectric;
-  })(Pwr = PowerRelay.Pwr || (PowerRelay.Pwr = {}));
-  var JunctionId;
-  (function(JunctionId) {
-    function fromDb(id) {
-      return id;
-    }
-    JunctionId.fromDb = fromDb;
-  })(JunctionId = PowerRelay.JunctionId || (PowerRelay.JunctionId = {}));
-  var RelayId;
-  (function(RelayId) {
-    function fromDb(id) {
-      return id;
-    }
-    RelayId.fromDb = fromDb;
-  })(RelayId = PowerRelay.RelayId || (PowerRelay.RelayId = {}));
-  var Junction;
-  (function(Junction) {
-    function toMap(jns) {
-      return jns.reduce(function(r, n) {
-        var id = getJunctionId(n);
-        r[id] = {
-          junctionId: JunctionId.fromDb(id),
-          location: n.location
-        };
-        return r;
-      }, {});
-    }
-    Junction.toMap = toMap;
-    function getJunctionId(jnc) {
-      return ("Junction{" + jnc.location.x + "," + jnc.location.y + "," + jnc.location.z + "}");
-    }
-    Junction.getJunctionId = getJunctionId;
-  })(Junction = PowerRelay.Junction || (PowerRelay.Junction = {}));
-  var Relay;
-  (function(Relay) {
-    function toMap(rls) {
-      return rls.reduce(function(r, n) {
-        var id = getRelayId(n);
-        r[id] = {
-          relayId: RelayId.fromDb(id),
-          powerRating: n.powerRating,
-          path: n.path,
-          srcJunctionId: JunctionId.fromDb(n.srcJunctionId),
-          dstJunctionId: JunctionId.fromDb(n.dstJunctionId)
-        };
-        return r;
-      }, {});
-    }
-    Relay.toMap = toMap;
-    function getRelayId(rly) {
-      return ("Relay{" + rly.srcJunctionId + "-to-" + rly.dstJunctionId + "}");
-    }
-    Relay.getRelayId = getRelayId;
-  })(Relay = PowerRelay.Relay || (PowerRelay.Relay = {}));
-  function shortestRelay(relays) {
-    var min;
-    var minDistance = Number.MAX_SAFE_INTEGER;
-    var ds;
-    for (var i = 0,
-        size = relays.length; i < size; i++) {
-      var rly = relays[i];
-      if (!min || minDistance > (ds = rly.path.length)) {
-        min = rly;
-        minDistance = ds;
-      }
-    }
-  }
-  function diagramToJunctionRelays(y, lines) {
-    assert(lines && lines.length > 0, "atleast 1 line required");
-    var rlys = [];
-    var jncs = [];
-    var mapLines = lines.map(function(ln) {
-      return ln.split("");
-    });
-    var zCount = mapLines.length;
-    var xCount = mapLines[0].length;
-    ForEachUtil.forEach2d(mapLines, function(ch, z, x, chs) {
-      assert(chs.length === xCount, "all lines must be equal length");
-      if (isJunction(ch, z, x, chs)) {
-        jncs.push(newJunction(x, y, z, mapLines));
-      }
-    });
-    var takenJncConns = [];
-    jncs.forEach(function(jn) {
-      var _a = jn.location,
-          x = _a.x,
-          z = _a.z;
-      var jncRelays = walkConnections(x, z, xCount, zCount, mapLines, takenJncConns);
-      Array.prototype.push.apply(rlys, jncRelays);
-    });
-    return {
-      junctions: jncs,
-      relays: rlys,
-      size: {
-        width: xCount,
-        height: zCount
-      }
-    };
-  }
-  PowerRelay.diagramToJunctionRelays = diagramToJunctionRelays;
-  function isJunction(ch, z, x, lines) {
-    return ch === "+";
-  }
-  function newJunction(x, y, z, ary) {
-    var jnc = {
-      junctionId: null,
-      location: {
-        x: x,
-        y: y,
-        z: z
-      }
-    };
-    jnc.junctionId = Junction.getJunctionId(jnc);
-    return jnc;
-  }
-  function walkConnections(x, z, xCount, zCount, board, jncConnsUsed) {
-    for (var i = 0,
-        size = jncConnsUsed.length; i < size; i++) {
-      var jnc = jncConnsUsed[i];
-      if (jnc.x === x && jnc.z === z) {
-        return;
-      }
-    }
-    jncConnsUsed.push({
-      x: x,
-      z: z
-    });
-    function toRelay(jncPath) {
-      var relay = {
-        relayId: null,
-        powerRating: PowerRating.getPowerRating(),
-        path: jncPath.points.map(function(p) {
-          return ({
-            x: p.x,
-            y: 0,
-            z: p.z
-          });
-        }),
-        srcJunctionId: Junction.getJunctionId({location: {
-            x: x,
-            y: 0,
-            z: z
-          }}),
-        dstJunctionId: Junction.getJunctionId({location: jncPath.junction})
-      };
-      relay.relayId = Relay.getRelayId(relay);
-      return relay;
-    }
-    var xOrig = x;
-    var zOrig = z;
-    var relays = [];
-    function createRelayPath(x, z) {
-      if (board[z][x] !== " ") {
-        var path = walkToJunction(x, z, xCount, zCount, board, '+', xOrig, zOrig, true);
-        relays.push(toRelay(path));
-      }
-    }
-    ForEachUtil.forEachDirection(x, z, xCount, zCount, {
-      top: createRelayPath,
-      topRight: createRelayPath,
-      right: createRelayPath,
-      bottomRight: createRelayPath,
-      bottom: createRelayPath,
-      bottomLeft: createRelayPath,
-      left: createRelayPath,
-      topLeft: createRelayPath
-    });
-    return relays;
-  }
-  function walkToJunction(x, z, xCount, zCount, board, endChar, xStartJunc, zStartJunc, ignorePointsBehind) {
-    var dst = [{
-      x: x,
-      z: z
-    }];
-    var xPrev = xStartJunc;
-    var zPrev = zStartJunc;
-    do {
-      var dstLen = dst.length;
-      var res = nextStepPaths(x, z, xCount, zCount, board, endChar, xPrev, zPrev, true, dst);
-      if (dstLen === (dstLen = dst.length)) {
-        break;
-      }
-      xPrev = x;
-      zPrev = z;
-      x = dst[dstLen - 1].x;
-      z = dst[dstLen - 1].z;
-    } while (res == null && x > -1 && z > -1 && x < xCount && z < zCount);
-    if (res == null) {
-      throw new Error("no valid next step found moving from [x=" + xPrev + ",z=" + zPrev + "] through [x=" + x + ",z=" + z + "]");
-    }
-    return {
-      connectionDirection: {
-        x: xStartJunc - x,
-        y: 0,
-        z: zStartJunc - z
-      },
-      junction: {
-        x: res.x,
-        y: 0,
-        z: res.z
-      },
-      points: dst
-    };
-  }
-  function nextStepPaths(x, z, xCount, zCount, board, endChar, xPrev, zPrev, ignorePointsBehind, dst) {
-    function checkAdjacent(expect, expect2, expect3, xx, zz, notExpect) {
-      if (xx === xPrev && zz === zPrev) {
-        return null;
-      }
-      var ch = board[zz][xx];
-      if (ch === expect || ch === expect2 || ch === expect3) {
-        dst.push({
-          x: xx,
-          z: zz
-        });
-      } else if (notExpect === ch) {} else if (ch === endChar) {
-        return {
-          x: xx,
-          z: zz
-        };
-      }
-      return null;
-    }
-    var res = ForEachUtil.forEachDirection(x, z, xCount, zCount, {
-      top: function(x, z) {
-        return checkAdjacent('|', '/', '\\', x, z, '-');
-      },
-      topRight: function(x, z) {
-        return checkAdjacent('/', '|', '-', x, z, '\\');
-      },
-      right: function(x, z) {
-        return checkAdjacent('-', '/', '\\', x, z, '|');
-      },
-      bottomRight: function(x, z) {
-        return checkAdjacent('\\', '|', '-', x, z, '/');
-      },
-      bottom: function(x, z) {
-        return checkAdjacent('|', '/', '\\', x, z, '-');
-      },
-      bottomLeft: function(x, z) {
-        return checkAdjacent('/', '|', '-', x, z, '\\');
-      },
-      left: function(x, z) {
-        return checkAdjacent('-', '/', '\\', x, z, '|');
-      },
-      topLeft: function(x, z) {
-        return checkAdjacent('\\', '|', '-', x, z, '//');
-      }
-    }, ignorePointsBehind, xPrev, zPrev);
-    return res;
-  }
-  function invalidSymbolAt(x, z, ary, expected) {
-    return new Error("invalid symbol '" + ary[z][x] + "' at x=" + x + ", z=" + z + (expected ? ", '" + expected : "'"));
-  }
-  PowerRelay.invalidSymbolAt = invalidSymbolAt;
-})(PowerRelay || (PowerRelay = {}));
-module.exports = PowerRelay;
-
-
-},{"../ForEachUtil":1,"assert":6}],6:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -741,14 +392,36 @@ module.exports = PowerRelay;
 // ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-// when used in node, this will actually load the util module we depend on
-// versus loading the builtin util module as happens otherwise
-// this is a bug in node module loading as far as I am concerned
 var util = require('util/');
-
-var pSlice = Array.prototype.slice;
 var hasOwn = Object.prototype.hasOwnProperty;
-
+var pSlice = Array.prototype.slice;
+var functionsHaveNames = (function () {
+  return function foo() {}.name === 'foo';
+}());
+function pToString (obj) {
+  return Object.prototype.toString.call(obj);
+}
+function isView(arrbuf) {
+  if (isBuffer(arrbuf)) {
+    return false;
+  }
+  if (typeof global.ArrayBuffer !== 'function') {
+    return false;
+  }
+  if (typeof ArrayBuffer.isView === 'function') {
+    return ArrayBuffer.isView(arrbuf);
+  }
+  if (!arrbuf) {
+    return false;
+  }
+  if (arrbuf instanceof DataView) {
+    return true;
+  }
+  if (arrbuf.buffer && arrbuf.buffer instanceof ArrayBuffer) {
+    return true;
+  }
+  return false;
+}
 // 1. The assert module provides functions that throw
 // AssertionError's when particular conditions are not met. The
 // assert module must conform to the following interface.
@@ -760,6 +433,19 @@ var assert = module.exports = ok;
 //                             actual: actual,
 //                             expected: expected })
 
+var regex = /\s*function\s+([^\(\s]*)\s*/;
+// based on https://github.com/ljharb/function.prototype.name/blob/adeeeec8bfcc6068b187d7d9fb3d5bb1d3a30899/implementation.js
+function getName(func) {
+  if (!util.isFunction(func)) {
+    return;
+  }
+  if (functionsHaveNames) {
+    return func.name;
+  }
+  var str = func.toString();
+  var match = str.match(regex);
+  return match && match[1];
+}
 assert.AssertionError = function AssertionError(options) {
   this.name = 'AssertionError';
   this.actual = options.actual;
@@ -773,18 +459,16 @@ assert.AssertionError = function AssertionError(options) {
     this.generatedMessage = true;
   }
   var stackStartFunction = options.stackStartFunction || fail;
-
   if (Error.captureStackTrace) {
     Error.captureStackTrace(this, stackStartFunction);
-  }
-  else {
+  } else {
     // non v8 browsers so we can have a stacktrace
     var err = new Error();
     if (err.stack) {
       var out = err.stack;
 
       // try to strip useless frames
-      var fn_name = stackStartFunction.name;
+      var fn_name = getName(stackStartFunction);
       var idx = out.indexOf('\n' + fn_name);
       if (idx >= 0) {
         // once we have located the function frame
@@ -801,31 +485,25 @@ assert.AssertionError = function AssertionError(options) {
 // assert.AssertionError instanceof Error
 util.inherits(assert.AssertionError, Error);
 
-function replacer(key, value) {
-  if (util.isUndefined(value)) {
-    return '' + value;
-  }
-  if (util.isNumber(value) && !isFinite(value)) {
-    return value.toString();
-  }
-  if (util.isFunction(value) || util.isRegExp(value)) {
-    return value.toString();
-  }
-  return value;
-}
-
 function truncate(s, n) {
-  if (util.isString(s)) {
+  if (typeof s === 'string') {
     return s.length < n ? s : s.slice(0, n);
   } else {
     return s;
   }
 }
-
+function inspect(something) {
+  if (functionsHaveNames || !util.isFunction(something)) {
+    return util.inspect(something);
+  }
+  var rawname = getName(something);
+  var name = rawname ? ': ' + rawname : '';
+  return '[Function' +  name + ']';
+}
 function getMessage(self) {
-  return truncate(JSON.stringify(self.actual, replacer), 128) + ' ' +
+  return truncate(inspect(self.actual), 128) + ' ' +
          self.operator + ' ' +
-         truncate(JSON.stringify(self.expected, replacer), 128);
+         truncate(inspect(self.expected), 128);
 }
 
 // At present only the three keys mentioned above are used and
@@ -885,24 +563,23 @@ assert.notEqual = function notEqual(actual, expected, message) {
 // assert.deepEqual(actual, expected, message_opt);
 
 assert.deepEqual = function deepEqual(actual, expected, message) {
-  if (!_deepEqual(actual, expected)) {
+  if (!_deepEqual(actual, expected, false)) {
     fail(actual, expected, message, 'deepEqual', assert.deepEqual);
   }
 };
 
-function _deepEqual(actual, expected) {
+assert.deepStrictEqual = function deepStrictEqual(actual, expected, message) {
+  if (!_deepEqual(actual, expected, true)) {
+    fail(actual, expected, message, 'deepStrictEqual', assert.deepStrictEqual);
+  }
+};
+
+function _deepEqual(actual, expected, strict, memos) {
   // 7.1. All identical values are equivalent, as determined by ===.
   if (actual === expected) {
     return true;
-
-  } else if (util.isBuffer(actual) && util.isBuffer(expected)) {
-    if (actual.length != expected.length) return false;
-
-    for (var i = 0; i < actual.length; i++) {
-      if (actual[i] !== expected[i]) return false;
-    }
-
-    return true;
+  } else if (isBuffer(actual) && isBuffer(expected)) {
+    return compare(actual, expected) === 0;
 
   // 7.2. If the expected value is a Date object, the actual value is
   // equivalent if it is also a Date object that refers to the same time.
@@ -921,8 +598,22 @@ function _deepEqual(actual, expected) {
 
   // 7.4. Other pairs that do not both pass typeof value == 'object',
   // equivalence is determined by ==.
-  } else if (!util.isObject(actual) && !util.isObject(expected)) {
-    return actual == expected;
+  } else if ((actual === null || typeof actual !== 'object') &&
+             (expected === null || typeof expected !== 'object')) {
+    return strict ? actual === expected : actual == expected;
+
+  // If both values are instances of typed arrays, wrap their underlying
+  // ArrayBuffers in a Buffer each to increase performance
+  // This optimization requires the arrays to have the same type as checked by
+  // Object.prototype.toString (aka pToString). Never perform binary
+  // comparisons for Float*Arrays, though, since e.g. +0 === -0 but their
+  // bit patterns are not identical.
+  } else if (isView(actual) && isView(expected) &&
+             pToString(actual) === pToString(expected) &&
+             !(actual instanceof Float32Array ||
+               actual instanceof Float64Array)) {
+    return compare(new Uint8Array(actual.buffer),
+                   new Uint8Array(expected.buffer)) === 0;
 
   // 7.5 For all other Object pairs, including Array objects, equivalence is
   // determined by having the same number of owned properties (as verified
@@ -930,8 +621,22 @@ function _deepEqual(actual, expected) {
   // (although not necessarily the same order), equivalent values for every
   // corresponding key, and an identical 'prototype' property. Note: this
   // accounts for both named and indexed properties on Arrays.
+  } else if (isBuffer(actual) !== isBuffer(expected)) {
+    return false;
   } else {
-    return objEquiv(actual, expected);
+    memos = memos || {actual: [], expected: []};
+
+    var actualIndex = memos.actual.indexOf(actual);
+    if (actualIndex !== -1) {
+      if (actualIndex === memos.expected.indexOf(expected)) {
+        return true;
+      }
+    }
+
+    memos.actual.push(actual);
+    memos.expected.push(expected);
+
+    return objEquiv(actual, expected, strict, memos);
   }
 }
 
@@ -939,44 +644,44 @@ function isArguments(object) {
   return Object.prototype.toString.call(object) == '[object Arguments]';
 }
 
-function objEquiv(a, b) {
-  if (util.isNullOrUndefined(a) || util.isNullOrUndefined(b))
+function objEquiv(a, b, strict, actualVisitedObjects) {
+  if (a === null || a === undefined || b === null || b === undefined)
     return false;
-  // an identical 'prototype' property.
-  if (a.prototype !== b.prototype) return false;
   // if one is a primitive, the other must be same
-  if (util.isPrimitive(a) || util.isPrimitive(b)) {
+  if (util.isPrimitive(a) || util.isPrimitive(b))
     return a === b;
-  }
-  var aIsArgs = isArguments(a),
-      bIsArgs = isArguments(b);
+  if (strict && Object.getPrototypeOf(a) !== Object.getPrototypeOf(b))
+    return false;
+  var aIsArgs = isArguments(a);
+  var bIsArgs = isArguments(b);
   if ((aIsArgs && !bIsArgs) || (!aIsArgs && bIsArgs))
     return false;
   if (aIsArgs) {
     a = pSlice.call(a);
     b = pSlice.call(b);
-    return _deepEqual(a, b);
+    return _deepEqual(a, b, strict);
   }
-  var ka = objectKeys(a),
-      kb = objectKeys(b),
-      key, i;
+  var ka = objectKeys(a);
+  var kb = objectKeys(b);
+  var key, i;
   // having the same number of owned properties (keys incorporates
   // hasOwnProperty)
-  if (ka.length != kb.length)
+  if (ka.length !== kb.length)
     return false;
   //the same set of keys (although not necessarily the same order),
   ka.sort();
   kb.sort();
   //~~~cheap key test
   for (i = ka.length - 1; i >= 0; i--) {
-    if (ka[i] != kb[i])
+    if (ka[i] !== kb[i])
       return false;
   }
   //equivalent values for every corresponding key, and
   //~~~possibly expensive deep test
   for (i = ka.length - 1; i >= 0; i--) {
     key = ka[i];
-    if (!_deepEqual(a[key], b[key])) return false;
+    if (!_deepEqual(a[key], b[key], strict, actualVisitedObjects))
+      return false;
   }
   return true;
 }
@@ -985,10 +690,18 @@ function objEquiv(a, b) {
 // assert.notDeepEqual(actual, expected, message_opt);
 
 assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
-  if (_deepEqual(actual, expected)) {
+  if (_deepEqual(actual, expected, false)) {
     fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
   }
 };
+
+assert.notDeepStrictEqual = notDeepStrictEqual;
+function notDeepStrictEqual(actual, expected, message) {
+  if (_deepEqual(actual, expected, true)) {
+    fail(actual, expected, message, 'notDeepStrictEqual', notDeepStrictEqual);
+  }
+}
+
 
 // 9. The strict equality assertion tests strict equality, as determined by ===.
 // assert.strictEqual(actual, expected, message_opt);
@@ -1015,28 +728,46 @@ function expectedException(actual, expected) {
 
   if (Object.prototype.toString.call(expected) == '[object RegExp]') {
     return expected.test(actual);
-  } else if (actual instanceof expected) {
-    return true;
-  } else if (expected.call({}, actual) === true) {
-    return true;
   }
 
-  return false;
+  try {
+    if (actual instanceof expected) {
+      return true;
+    }
+  } catch (e) {
+    // Ignore.  The instanceof check doesn't work for arrow functions.
+  }
+
+  if (Error.isPrototypeOf(expected)) {
+    return false;
+  }
+
+  return expected.call({}, actual) === true;
+}
+
+function _tryBlock(block) {
+  var error;
+  try {
+    block();
+  } catch (e) {
+    error = e;
+  }
+  return error;
 }
 
 function _throws(shouldThrow, block, expected, message) {
   var actual;
 
-  if (util.isString(expected)) {
+  if (typeof block !== 'function') {
+    throw new TypeError('"block" argument must be a function');
+  }
+
+  if (typeof expected === 'string') {
     message = expected;
     expected = null;
   }
 
-  try {
-    block();
-  } catch (e) {
-    actual = e;
-  }
+  actual = _tryBlock(block);
 
   message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
             (message ? ' ' + message : '.');
@@ -1045,7 +776,14 @@ function _throws(shouldThrow, block, expected, message) {
     fail(actual, expected, 'Missing expected exception' + message);
   }
 
-  if (!shouldThrow && expectedException(actual, expected)) {
+  var userProvidedMessage = typeof message === 'string';
+  var isUnwantedException = !shouldThrow && util.isError(actual);
+  var isUnexpectedException = !shouldThrow && actual && !expected;
+
+  if ((isUnwantedException &&
+      userProvidedMessage &&
+      expectedException(actual, expected)) ||
+      isUnexpectedException) {
     fail(actual, expected, 'Got unwanted exception' + message);
   }
 
@@ -1059,15 +797,15 @@ function _throws(shouldThrow, block, expected, message) {
 // assert.throws(block, Error_opt, message_opt);
 
 assert.throws = function(block, /*optional*/error, /*optional*/message) {
-  _throws.apply(this, [true].concat(pSlice.call(arguments)));
+  _throws(true, block, error, message);
 };
 
 // EXTENSION! This is annoying to write outside this module.
-assert.doesNotThrow = function(block, /*optional*/message) {
-  _throws.apply(this, [false].concat(pSlice.call(arguments)));
+assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
+  _throws(false, block, error, message);
 };
 
-assert.ifError = function(err) { if (err) {throw err;}};
+assert.ifError = function(err) { if (err) throw err; };
 
 var objectKeys = Object.keys || function (obj) {
   var keys = [];
@@ -1076,6 +814,8 @@ var objectKeys = Object.keys || function (obj) {
   }
   return keys;
 };
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
 },{"util/":10}],7:[function(require,module,exports){
 // shim for using process in browser
@@ -1248,6 +988,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -1882,5 +1626,5 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./support/isBuffer":9,"_process":7,"inherits":8}]},{},[3])
-//# sourceMappingURL=app-traceur-es6ify.js.map
+},{"./support/isBuffer":9,"_process":7,"inherits":8}]},{},[])
+//# sourceMappingURL=app-uglify-common.js.map

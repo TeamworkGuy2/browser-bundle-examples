@@ -1,6 +1,6 @@
 ﻿import chai = require("chai");
 import mocha = require("mocha");
-import PowerReplay = require("../src/example1/PowerRelay");
+import PowerReplay = require("../src/example-code/power-grid/PowerRelay");
 
 var asr = chai.assert;
 

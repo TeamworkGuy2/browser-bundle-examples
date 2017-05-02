@@ -1,4 +1,733 @@
+/* TypeScript static helpers - inserted once, here.  Run TypeScript compiler with '--noEmitHelpers' option to prevent duplicate helpers being inserted into each bundled TypeScript file */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
+
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+"use strict";
+
+var ForEachUtil;
+(function (ForEachUtil) {
+    var dirDown = 1;
+    var dirDownLeft = 2;
+    var dirLeft = 4;
+    var dirUpLeft = 8;
+    var dirUp = 16;
+    var dirUpRight = 32;
+    var dirRight = 64;
+    var dirDownRight = 128;
+    /** Given a point on a grid of given size and handlers for 8 directions (horizontal, vertical, diagonal),
+     * call the directional handlers for adjacent cells which are still within grid bounds.
+     * @param x the 0-based X position of the point being checked
+     * @param z the 0-based Z position of the point being checked
+     * @param xCount the exclusive width (X) size of the grid
+     * @param zCount the exclusive depth (Z) size of the grid
+     * @param dirHandlers the map associating directions with handler functions (all properties must not be null)
+     * @param ignoreBehindPoints ignore the 3 points in the direction away from a line draw from 'xPrev,zPrev' to 'x,z'
+     * @return the first handler return value other than undefined (handlers are called based on the above described criteria)
+     */
+    function forEachDirection(x, z, xCount, zCount, dirHandlers, ignoreBehindPoints, xPrev, zPrev) {
+        if (x === xPrev && z === zPrev) {
+            throw new Error("cannot determine direction since x,z and xPrev,zPrev are the same");
+        }
+        var dir = z === zPrev ? x < xPrev ? dirLeft : dirRight /*left or right*/ : z > zPrev ? x > xPrev ? dirDownRight : x === xPrev ? dirDown : dirDownLeft : /*down-ish*/x > xPrev ? dirUpRight : x === xPrev ? dirUp : dirUpLeft /*up-ish*/;
+        var ignore = ignoreBehindPoints;
+        var ignoreTop = ignore ? dir === dirDownRight || dir === dirDown || dir === dirDownLeft : false;
+        var ignoreTopRight = ignore ? dir === dirDown || dir === dirDownLeft || dir === dirLeft : false;
+        var ignoreRight = ignore ? dir === dirDownLeft || dir === dirLeft || dir === dirUpLeft : false;
+        var ignoreBottomRight = ignore ? dir === dirLeft || dir === dirUpLeft || dir === dirUp : false;
+        var ignoreBottom = ignore ? dir === dirUpLeft || dir === dirUp || dir === dirUpRight : false;
+        var ignoreBottomLeft = ignore ? dir === dirUp || dir === dirUpRight || dir === dirRight : false;
+        var ignoreLeft = ignore ? dir === dirUpRight || dir === dirRight || dir === dirDownRight : false;
+        var ignoreTopLeft = ignore ? dir === dirRight || dir === dirDownRight || dir === dirDown : false;
+        var topLeftRan = false;
+        var topRightRan = false;
+        var bottomLeftRan = false;
+        var bottomRightRan = false;
+        if (x > 0) {
+            if (z > 0) {
+                // = = .
+                // = + .
+                // . . .
+                if (!ignoreLeft) {
+                    var res = dirHandlers.left(x - 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTopLeft) {
+                    var res = dirHandlers.topLeft(x - 1, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTop) {
+                    var res = dirHandlers.top(x, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                topLeftRan = true;
+            }
+            if (z < zCount - 1) {
+                // . = =
+                // . + =
+                // . . .
+                if (!ignoreTop && !topLeftRan) {
+                    var res = dirHandlers.top(x, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTopRight) {
+                    var res = dirHandlers.topRight(x + 1, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreRight) {
+                    var res = dirHandlers.right(x + 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                topRightRan = true;
+            }
+        }
+        if (x < xCount - 1) {
+            if (z > 0) {
+                // . . .
+                // = + .
+                // = = .
+                if (!ignoreBottom) {
+                    var res = dirHandlers.bottom(x, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreBottomLeft) {
+                    var res = dirHandlers.bottomLeft(x - 1, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreLeft && !topLeftRan) {
+                    var res = dirHandlers.left(x - 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                bottomLeftRan = true;
+            }
+            if (z < zCount - 1) {
+                // . . .
+                // . + =
+                // . = =
+                if (!ignoreBottom && !bottomLeftRan) {
+                    var res = dirHandlers.bottom(x, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreBottomRight) {
+                    var res = dirHandlers.bottomRight(x + 1, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreRight && !topRightRan) {
+                    var res = dirHandlers.right(x + 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                bottomRightRan = true;
+            }
+        }
+        return undefined;
+    }
+    ForEachUtil.forEachDirection = forEachDirection;
+    /** Given a point on a grid of given size and handlers for 8 directions (horizontal, vertical, diagonal),
+     * call the directional handlers for adjacent cells which are still within grid bounds.
+     * @param x the 0-based X position of the point being checked
+     * @param z the 0-based Z position of the point being checked
+     * @param xCount the exclusive width (X) size of the grid
+     * @param zCount the exclusive depth (Z) size of the grid
+     * @param dirHandlers the map associating directions with handler functions (all properties must not be null)
+     * @param ignoreBehindPoints ignore the 3 points in the direction away from a line draw from 'xPrev,zPrev' to 'x,z'
+     * @return the first handler return value other than undefined (handlers are called based on the above described criteria)
+     */
+    function forEachDirectionConsume(x, z, xCount, zCount, dirHandler, ignoreBehindPoints, xPrev, zPrev) {
+        if (x === xPrev && z === zPrev) {
+            throw new Error("cannot determine direction since x,z and xPrev,zPrev are the same");
+        }
+        var dir = z === zPrev ? x < xPrev ? dirLeft : dirRight /*left or right*/ : z > zPrev ? x > xPrev ? dirDownRight : x === xPrev ? dirDown : dirDownLeft : /*down-ish*/x > xPrev ? dirUpRight : x === xPrev ? dirUp : dirUpLeft /*up-ish*/;
+        var ignore = ignoreBehindPoints;
+        var ignoreTop = ignore ? dir === dirDownRight || dir === dirDown || dir === dirDownLeft : false;
+        var ignoreTopRight = ignore ? dir === dirDown || dir === dirDownLeft || dir === dirLeft : false;
+        var ignoreRight = ignore ? dir === dirDownLeft || dir === dirLeft || dir === dirUpLeft : false;
+        var ignoreBottomRight = ignore ? dir === dirLeft || dir === dirUpLeft || dir === dirUp : false;
+        var ignoreBottom = ignore ? dir === dirUpLeft || dir === dirUp || dir === dirUpRight : false;
+        var ignoreBottomLeft = ignore ? dir === dirUp || dir === dirUpRight || dir === dirRight : false;
+        var ignoreLeft = ignore ? dir === dirUpRight || dir === dirRight || dir === dirDownRight : false;
+        var ignoreTopLeft = ignore ? dir === dirRight || dir === dirDownRight || dir === dirDown : false;
+        var topLeftRan = false;
+        var topRightRan = false;
+        var bottomLeftRan = false;
+        var bottomRightRan = false;
+        if (x > 0) {
+            if (z > 0) {
+                // = = .
+                // = + .
+                // . . .
+                if (!ignoreLeft) {
+                    var res = dirHandler(x - 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTopLeft) {
+                    var res = dirHandler(x - 1, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTop) {
+                    var res = dirHandler(x, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                topLeftRan = true;
+            }
+            if (z < zCount - 1) {
+                // . = =
+                // . + =
+                // . . .
+                if (!ignoreTop && !topLeftRan) {
+                    var res = dirHandler(x, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreTopRight) {
+                    var res = dirHandler(x + 1, z - 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreRight) {
+                    var res = dirHandler(x + 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                topRightRan = true;
+            }
+        }
+        if (x < xCount - 1) {
+            if (z > 0) {
+                // . . .
+                // = + .
+                // = = .
+                if (!ignoreBottom) {
+                    var res = dirHandler(x, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreBottomLeft) {
+                    var res = dirHandler(x - 1, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreLeft && !topLeftRan) {
+                    var res = dirHandler(x - 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                bottomLeftRan = true;
+            }
+            if (z < zCount - 1) {
+                // . . .
+                // . + =
+                // . = =
+                if (!ignoreBottom && !bottomLeftRan) {
+                    var res = dirHandler(x, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreBottomRight) {
+                    var res = dirHandler(x + 1, z + 1);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                if (!ignoreRight && !topRightRan) {
+                    var res = dirHandler(x + 1, z);
+                    if (res != null) {
+                        return res;
+                    }
+                }
+                bottomRightRan = true;
+            }
+        }
+        return undefined;
+    }
+    ForEachUtil.forEachDirectionConsume = forEachDirectionConsume;
+    function forEach2d(tArys, func) {
+        for (var i1 = 0, size1 = tArys.length; i1 < size1; i1++) {
+            var ts = tArys[i1];
+            for (var i2 = 0, size2 = ts.length; i2 < size2; i2++) {
+                func(ts[i2], i1, i2, ts, tArys);
+            }
+        }
+    }
+    ForEachUtil.forEach2d = forEach2d;
+})(ForEachUtil || (ForEachUtil = {}));
+module.exports = ForEachUtil;
+
+},{}],2:[function(require,module,exports){
+"use strict";
+
+var PowerRelay = require("./PowerRelay");
+var Junction = PowerRelay.Junction;
+var Relay = PowerRelay.Relay;
+var PowerGrid = function () {
+    function PowerGrid() {}
+    PowerGrid.prototype.createPowerGrid = function (map) {
+        var diagramParts = PowerRelay.diagramToJunctionRelays(0, map);
+        this.junctions = diagramParts.junctions;
+        this.relays = diagramParts.relays;
+        this.junctionCache = Junction.toMap(diagramParts.junctions);
+        this.relayCache = Relay.toMap(diagramParts.relays);
+        return diagramParts.size;
+    };
+    PowerGrid.prototype.createJunctionsGrid = function (map) {
+        var jncs = map.reduce(function (m, ln, z) {
+            ln.split("").forEach(function (s, x) {
+                if (s === "+") {
+                    var jnc = { junctionId: null, location: { x: x, y: 0, z: z } };
+                    jnc.junctionId = PowerRelay.Junction.getJunctionId(jnc);
+                    m.push(jnc);
+                }
+            });
+            return m;
+        }, []);
+        this.junctions = jncs;
+        this.junctionCache = Junction.toMap(jncs);
+        return {
+            width: map[0].length,
+            height: map.length
+        };
+    };
+    PowerGrid.prototype.getJunction = function (id) {
+        return this.junctionCache[id];
+    };
+    PowerGrid.prototype.getRelay = function (id) {
+        return this.relayCache[id];
+    };
+    PowerGrid.maps = {
+        defaultMap1: ["                                                                                ", "                                                                                ", "        +                                        +                         +    ", "       /                                         |                        /     ", "      /                 +--------+---------------+                       +      ", "     |                 /         |               |                       |      ", "     +                +          |               +-----------+-----------+      ", "     |                           |                                       |      ", "     +---------------------------+                                       |      ", "                                             +--\\                        |      ", "                                                 +-----------------------+      ", "                       +-------------------------+                              ", "                      /                          |                              ", "                     +                           +                              ", "                                                                                ", "                                                                                "],
+        hds: ["                                                                                ", "                                                                                ", "    +       +      +  +  +           + + + + +                                  ", "                                                                                ", "    +       +      +       +       +                                            ", "                                                                                ", "    +       +      +         +     +                                            ", "                                                                                ", "    + + + + +      +         +       + + + +                                    ", "                                                                                ", "    +       +      +         +               +                                  ", "                                                                                ", "    +       +      +       +                 +                                  ", "                                                                                ", "    +       +      +  +  +         + + + + +                                    ", "                                                                                "]
+    };
+    return PowerGrid;
+}();
+module.exports = PowerGrid;
+
+},{"./PowerRelay":5}],3:[function(require,module,exports){
+"use strict";
+
+var PowerGridWidgetHelper = require("./PowerGridWidgetHelper");
+var PowerGridWidget;
+(function (PowerGridWidget) {
+    var dotColor = "#C44";
+    function addSvgMap(doc, container, grid, gs) {
+        var junctions = grid.junctions || [];
+        var relays = grid.relays || [];
+        for (var i = 0, size = junctions.length; i < size; i++) {
+            var junctionElem = createJunctionUi(doc, junctions[i].location, grid, gs);
+            container.appendChild(junctionElem);
+        }
+        for (var i = 0, size = relays.length; i < size; i++) {
+            var relayElem = createRelayUi(doc, relays[i], grid, gs);
+            container.appendChild(relayElem);
+        }
+    }
+    PowerGridWidget.addSvgMap = addSvgMap;
+    function createJunctionUi(doc, point, pg, gs) {
+        var x = gs.xSize * (point.x + 0.5);
+        var z = gs.zSize * (point.z + 0.5);
+        var elem = doc.createElementNS("http://www.w3.org/2000/svg", "circle");
+        elem.setAttributeNS(null, "r", 4 + '');
+        elem.setAttributeNS(null, "stroke", "#555");
+        elem.setAttributeNS(null, "stroke-width", 2 + '');
+        elem.setAttributeNS(null, "fill", dotColor);
+        elem.setAttributeNS(null, "cx", x + '');
+        elem.setAttributeNS(null, "cy", z + '');
+        return elem;
+    }
+    PowerGridWidget.createJunctionUi = createJunctionUi;
+    function createRelayUi(doc, relay, pg, gs) {
+        var pointsAttr = PowerGridWidgetHelper.relayToSvgPointsAttr(relay, pg, gs);
+        var elem = doc.createElementNS("http://www.w3.org/2000/svg", "polyline");
+        elem.setAttributeNS(null, "stroke", "#555");
+        elem.setAttributeNS(null, "fill", "none");
+        elem.setAttributeNS(null, "stroke-width", 2 + '');
+        elem.setAttributeNS(null, "points", pointsAttr);
+        return elem;
+    }
+    PowerGridWidget.createRelayUi = createRelayUi;
+})(PowerGridWidget || (PowerGridWidget = {}));
+// main - entry point
+(function main() {
+    var doc = window.document;
+    PowerGridWidgetHelper.onReady(doc, function () {
+        var gridUi = PowerGridWidgetHelper.newInst(doc, doc.getElementsByClassName("power-grid-widget")[0], { mapName: "defaultMap1" }, PowerGridWidget.addSvgMap);
+    });
+})();
+module.exports = PowerGridWidget;
+
+},{"./PowerGridWidgetHelper":4}],4:[function(require,module,exports){
+"use strict";
+
+var PowerGrid = require("./PowerGrid");
+var PowerGridWidgetHelper;
+(function (PowerGridWidgetHelper) {
+    function newInst(doc, container, settings, buildSvgFunc) {
+        var map = PowerGrid.maps[settings.mapName];
+        var grid = new PowerGrid();
+        var size = grid.createPowerGrid(map);
+        //var size = grid.createJunctionsGrid(map);
+        var gs = {
+            xCount: size.width,
+            zCount: size.height,
+            xSize: 10,
+            zSize: 10
+        };
+        //addSvgMap(doc, container, grid.relays, grid.junctions, gs);
+        var svgContainer = container.getElementsByClassName("map-display")[0];
+        buildSvgFunc(doc, svgContainer, grid, gs);
+    }
+    PowerGridWidgetHelper.newInst = newInst;
+    function relayToSvgPointsAttr(relay, pg, gs) {
+        var pointToPx = function pointToPx(p) {
+            return gs.xSize * (p.x + 0.5) + ',' + gs.zSize * (p.z + 0.5);
+        };
+        var points = relay.path.map(pointToPx);
+        var srcJnc = pg.getJunction(relay.srcJunctionId);
+        points.unshift(pointToPx(srcJnc.location));
+        var dstJnc = pg.getJunction(relay.dstJunctionId);
+        points.push(pointToPx(dstJnc.location));
+        return points.join(" ");
+    }
+    PowerGridWidgetHelper.relayToSvgPointsAttr = relayToSvgPointsAttr;
+    function onReady(document, func) {
+        if (typeof document === "function") {
+            func = document;
+            document = undefined;
+        }
+        var doc = document || window.document;
+        function ready(func) {
+            if (doc.readyState !== "loading") {
+                func();
+            } else {
+                doc.addEventListener("DOMContentLoaded", func);
+            }
+        }
+        ready(func);
+    }
+    PowerGridWidgetHelper.onReady = onReady;
+})(PowerGridWidgetHelper || (PowerGridWidgetHelper = {}));
+module.exports = PowerGridWidgetHelper;
+
+},{"./PowerGrid":2}],5:[function(require,module,exports){
+"use strict";
+
+var assert = require("assert");
+var ForEachUtil = require("../ForEachUtil");
+var PowerRelay;
+(function (PowerRelay) {
+    var PowerRating;
+    (function (PowerRating) {
+        function getPowerRating() {
+            return { maxPower: 271, safeOperatePower: 139, standbyPower: 43 };
+        }
+        PowerRating.getPowerRating = getPowerRating;
+    })(PowerRating = PowerRelay.PowerRating || (PowerRelay.PowerRating = {}));
+    var Pwr;
+    (function (Pwr) {
+        function fromElectric(volts, amps) {
+            return volts * amps;
+        }
+        Pwr.fromElectric = fromElectric;
+    })(Pwr = PowerRelay.Pwr || (PowerRelay.Pwr = {}));
+    var JunctionId;
+    (function (JunctionId) {
+        function fromDb(id) {
+            return id;
+        }
+        JunctionId.fromDb = fromDb;
+    })(JunctionId = PowerRelay.JunctionId || (PowerRelay.JunctionId = {}));
+    var RelayId;
+    (function (RelayId) {
+        function fromDb(id) {
+            return id;
+        }
+        RelayId.fromDb = fromDb;
+    })(RelayId = PowerRelay.RelayId || (PowerRelay.RelayId = {}));
+    var Junction;
+    (function (Junction) {
+        function toMap(jns) {
+            return jns.reduce(function (r, n) {
+                var id = getJunctionId(n);
+                r[id] = {
+                    junctionId: JunctionId.fromDb(id),
+                    location: n.location
+                };
+                return r;
+            }, {});
+        }
+        Junction.toMap = toMap;
+        function getJunctionId(jnc) {
+            return "Junction{" + jnc.location.x + "," + jnc.location.y + "," + jnc.location.z + "}";
+        }
+        Junction.getJunctionId = getJunctionId;
+    })(Junction = PowerRelay.Junction || (PowerRelay.Junction = {}));
+    var Relay;
+    (function (Relay) {
+        function toMap(rls) {
+            return rls.reduce(function (r, n) {
+                var id = getRelayId(n);
+                r[id] = {
+                    relayId: RelayId.fromDb(id),
+                    powerRating: n.powerRating,
+                    path: n.path,
+                    srcJunctionId: JunctionId.fromDb(n.srcJunctionId),
+                    dstJunctionId: JunctionId.fromDb(n.dstJunctionId)
+                };
+                return r;
+            }, {});
+        }
+        Relay.toMap = toMap;
+        function getRelayId(rly) {
+            return "Relay{" + rly.srcJunctionId + "-to-" + rly.dstJunctionId + "}";
+        }
+        Relay.getRelayId = getRelayId;
+    })(Relay = PowerRelay.Relay || (PowerRelay.Relay = {}));
+    // map/board loading logic
+    function shortestRelay(relays) {
+        var min;
+        var minDistance = Number.MAX_SAFE_INTEGER;
+        var ds;
+        for (var i = 0, size = relays.length; i < size; i++) {
+            var rly = relays[i];
+            if (!min || minDistance > (ds = rly.path.length)) {
+                min = rly;
+                minDistance = ds;
+            }
+        }
+    }
+    /**
+     * @param lines assume each string is along the X-axis and the array of lines are along the Z-axis, 1x1 is the top-left corner
+     */
+    function diagramToJunctionRelays(y, lines) {
+        assert(lines && lines.length > 0, "atleast 1 line required");
+        var rlys = [];
+        var jncs = [];
+        var mapLines = lines.map(function (ln) {
+            return ln.split("");
+        }); // [z][x]
+        var zCount = mapLines.length;
+        var xCount = mapLines[0].length;
+        ForEachUtil.forEach2d(mapLines, function (ch, z, x, chs) {
+            assert(chs.length === xCount, "all lines must be equal length");
+            if (isJunction(ch, z, x, chs)) {
+                jncs.push(newJunction(x, y, z, mapLines));
+            }
+        });
+        var takenJncConns = [];
+        jncs.forEach(function (jn) {
+            var _a = jn.location,
+                x = _a.x,
+                z = _a.z;
+            var jncRelays = walkConnections(x, z, xCount, zCount, mapLines, takenJncConns);
+            Array.prototype.push.apply(rlys, jncRelays);
+        });
+        return {
+            junctions: jncs,
+            relays: rlys,
+            size: { width: xCount, height: zCount }
+        };
+    }
+    PowerRelay.diagramToJunctionRelays = diagramToJunctionRelays;
+    function isJunction(ch, z, x, lines) {
+        return ch === "+";
+    }
+    function newJunction(x, y, z, ary) {
+        var jnc = {
+            junctionId: null,
+            location: { x: x, y: y, z: z }
+        };
+        jnc.junctionId = Junction.getJunctionId(jnc);
+        return jnc;
+    }
+    /** given a junction, start looking down each path */
+    function walkConnections(x, z, xCount, zCount, board, jncConnsUsed) {
+        // TODO keep track of already used junction connections and don't re-walk them
+        for (var i = 0, size = jncConnsUsed.length; i < size; i++) {
+            var jnc = jncConnsUsed[i];
+            if (jnc.x === x && jnc.z === z) {
+                return;
+            }
+        }
+        jncConnsUsed.push({ x: x, z: z });
+        function toRelay(jncPath) {
+            var relay = {
+                relayId: null,
+                powerRating: PowerRating.getPowerRating(),
+                path: jncPath.points.map(function (p) {
+                    return { x: p.x, y: 0, z: p.z };
+                }),
+                srcJunctionId: Junction.getJunctionId({ location: { x: x, y: 0, z: z } }),
+                dstJunctionId: Junction.getJunctionId({ location: jncPath.junction })
+            };
+            relay.relayId = Relay.getRelayId(relay);
+            return relay;
+        }
+        var xOrig = x;
+        var zOrig = z;
+        var relays = [];
+        function createRelayPath(x, z) {
+            if (board[z][x] !== " ") {
+                var path = walkToJunction(x, z, xCount, zCount, board, '+', xOrig, zOrig, true);
+                relays.push(toRelay(path));
+            }
+        }
+        ForEachUtil.forEachDirection(x, z, xCount, zCount, {
+            top: createRelayPath,
+            topRight: createRelayPath,
+            right: createRelayPath,
+            bottomRight: createRelayPath,
+            bottom: createRelayPath,
+            bottomLeft: createRelayPath,
+            left: createRelayPath,
+            topLeft: createRelayPath
+        });
+        return relays;
+    }
+    /** given a starting point on a path, walk to the end
+     * @return the path, including the ending junction, the points along the path, and the direction
+     */
+    function walkToJunction(x, z, xCount, zCount, board, endChar, xStartJunc, zStartJunc, ignorePointsBehind) {
+        // initialize with the current point
+        var dst = [{ x: x, z: z }];
+        var xPrev = xStartJunc;
+        var zPrev = zStartJunc;
+        do {
+            var dstLen = dst.length;
+            // TODO more than 1 next step may be added to 'dst'
+            var res = nextStepPaths(x, z, xCount, zCount, board, endChar, xPrev, zPrev, true, dst);
+            if (dstLen === (dstLen = dst.length)) {
+                // dead-end, no next step found
+                break;
+            }
+            xPrev = x;
+            zPrev = z;
+            x = dst[dstLen - 1].x;
+            z = dst[dstLen - 1].z;
+        } while (res == null && x > -1 && z > -1 && x < xCount && z < zCount);
+        if (res == null) {
+            throw new Error("no valid next step found moving from [x=" + xPrev + ",z=" + zPrev + "] through [x=" + x + ",z=" + z + "]");
+        }
+        // TODO res may be null
+        return {
+            connectionDirection: { x: xStartJunc - x, y: 0, z: zStartJunc - z },
+            junction: { x: res.x, y: 0, z: res.z },
+            points: dst
+        };
+    }
+    /** Check for valid next steps along the path and push the x,z pairs into 'dst'
+     * @return whether endChar was found
+     */
+    function nextStepPaths(x, z, xCount, zCount, board, endChar, xPrev, zPrev, ignorePointsBehind, dst) {
+        function checkAdjacent(expect, expect2, expect3, xx, zz, notExpect) {
+            if (xx === xPrev && zz === zPrev) {
+                return null;
+            }
+            var ch = board[zz][xx];
+            if (ch === expect || ch === expect2 || ch === expect3) {
+                dst.push({ x: xx, z: zz });
+            } else if (notExpect === ch) {} else if (ch === endChar) {
+                return { x: xx, z: zz };
+            }
+            return null;
+        }
+        var res = ForEachUtil.forEachDirection(x, z, xCount, zCount, {
+            top: function top(x, z) {
+                return checkAdjacent('|', '/', '\\', x, z, '-');
+            },
+            topRight: function topRight(x, z) {
+                return checkAdjacent('/', '|', '-', x, z, '\\');
+            },
+            right: function right(x, z) {
+                return checkAdjacent('-', '/', '\\', x, z, '|');
+            },
+            bottomRight: function bottomRight(x, z) {
+                return checkAdjacent('\\', '|', '-', x, z, '/');
+            },
+            bottom: function bottom(x, z) {
+                return checkAdjacent('|', '/', '\\', x, z, '-');
+            },
+            bottomLeft: function bottomLeft(x, z) {
+                return checkAdjacent('/', '|', '-', x, z, '\\');
+            },
+            left: function left(x, z) {
+                return checkAdjacent('-', '/', '\\', x, z, '|');
+            },
+            topLeft: function topLeft(x, z) {
+                return checkAdjacent('\\', '|', '-', x, z, '//');
+            }
+        }, ignorePointsBehind, xPrev, zPrev);
+        return res;
+    }
+    function invalidSymbolAt(x, z, ary, expected) {
+        return new Error("invalid symbol '" + ary[z][x] + "' at x=" + x + ", z=" + z + (expected ? ", '" + expected : "'"));
+    }
+    PowerRelay.invalidSymbolAt = invalidSymbolAt;
+})(PowerRelay || (PowerRelay = {}));
+module.exports = PowerRelay;
+
+},{"../ForEachUtil":1,"assert":6}],6:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -359,40 +1088,96 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":5}],2:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-},{}],3:[function(require,module,exports){
+},{"util/":10}],7:[function(require,module,exports){
 // shim for using process in browser
-
 var process = module.exports = {};
 
-// cached from whatever global is present so that test runners that stub it don't break things.
-var cachedSetTimeout = setTimeout;
-var cachedClearTimeout = clearTimeout;
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
 
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
 var queue = [];
 var draining = false;
 var currentQueue;
@@ -417,7 +1202,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = cachedSetTimeout(cleanUpNextTick);
+    var timeout = runTimeout(cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -434,7 +1219,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    cachedClearTimeout(timeout);
+    runClearTimeout(timeout);
 }
 
 process.nextTick = function (fun) {
@@ -446,7 +1231,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        cachedSetTimeout(drainQueue, 0);
+        runTimeout(drainQueue);
     }
 };
 
@@ -485,14 +1270,39 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],4:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+},{}],9:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],5:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1083,469 +1893,5 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./support/isBuffer":4,"_process":3,"inherits":2}],6:[function(require,module,exports){
-"use strict";
-
-var PowerRelay = require("./PowerRelay");
-var Junction = PowerRelay.Junction;
-var Relay = PowerRelay.Relay;
-var PowerGrid = function () {
-    function PowerGrid() {}
-    PowerGrid.prototype.createPowerGrid = function (map) {
-        var _this = this;
-        var diagramParts = PowerRelay.diagramToJunctionRelays(0, map);
-        this.junctionCache = Junction.toMap(diagramParts.junctions);
-        this.junctions = Object.keys(this.junctionCache).map(function (k) {
-            return _this.junctionCache[k];
-        });
-        this.relayCache = Relay.toMap(diagramParts.relays);
-        this.relays = Object.keys(this.relayCache).map(function (k) {
-            return _this.relayCache[k];
-        });
-        return diagramParts.size;
-    };
-    PowerGrid.prototype.getJunction = function (id) {
-        return this.junctionCache[id];
-    };
-    PowerGrid.prototype.getRelay = function (id) {
-        return this.relayCache[id];
-    };
-    PowerGrid.maps = {
-        defaultMap1: ["                                                                                ", "                                                                                ", "        +                                        +                         +    ", "       /                                         |                        /     ", "      /                 +--------+---------------+                       +      ", "     |                 /         |               |                       |      ", "     +                +          |               +-----------+-----------+      ", "     |                           |                                       |      ", "     +---------------------------+                                       |      ", "                                             +--\\                        |      ", "                                                 +-----------------------+      ", "                       +-------------------------+                              ", "                      /                          |                              ", "                     +                           +                              ", "                                                                                ", "                                                                                "],
-        hds: ["                                                                                ", "                                                                                ", "    +       +      +  +  +           + + + + +                                  ", "                                                                                ", "    +       +      +       +       +                                            ", "                                                                                ", "    +       +      +         +     +                                            ", "                                                                                ", "    + + + + +      +         +       + + + +                                    ", "                                                                                ", "    +       +      +         +               +                                  ", "                                                                                ", "    +       +      +       +                 +                                  ", "                                                                                ", "    +       +      +  +  +         + + + + +                                    ", "                                                                                "]
-    };
-    return PowerGrid;
-}();
-module.exports = PowerGrid;
-
-},{"./PowerRelay":9}],7:[function(require,module,exports){
-"use strict";
-
-var PowerGridWidgetHelper = require("./PowerGridWidgetHelper");
-var PowerGridWidget;
-(function (PowerGridWidget) {
-    var dotColor = "#C44";
-    function addSvgMap(doc, container, relays, junctions, gs) {
-        for (var i = 0, size = relays.length; i < size; i++) {
-            var relayElem = createRelayUi(doc, relays[i].path, gs);
-            container.appendChild(relayElem);
-        }
-        for (var i = 0, size = junctions.length; i < size; i++) {
-            var junctionElem = createJunctionUi(doc, junctions[i].location, gs);
-            container.appendChild(junctionElem);
-        }
-    }
-    PowerGridWidget.addSvgMap = addSvgMap;
-    function createJunctionUi(doc, point, gs) {
-        var x = gs.xSize * (point.x + 0.5);
-        var z = gs.zSize * (point.z + 0.5);
-        var elem = doc.createElementNS("http://www.w3.org/2000/svg", "circle");
-        elem.setAttributeNS(null, "r", 4 + '');
-        elem.setAttributeNS(null, "stroke", "#555");
-        elem.setAttributeNS(null, "stroke-width", 2 + '');
-        elem.setAttributeNS(null, "fill", dotColor);
-        elem.setAttributeNS(null, "cx", x + '');
-        elem.setAttributeNS(null, "cy", z + '');
-        return elem;
-    }
-    PowerGridWidget.createJunctionUi = createJunctionUi;
-    function createRelayUi(doc, points, gs) {
-        var elem = doc.createElementNS("http://www.w3.org/2000/svg", "polyline");
-        elem.setAttributeNS(null, "stroke", "#555");
-        elem.setAttributeNS(null, "stroke-width", 2 + '');
-        elem.setAttributeNS(null, "points", points.map(function (p) {
-            return gs.xSize * (p.x + 0.5) + ',' + gs.zSize * (p.z + 0.5);
-        }).join(" "));
-        return elem;
-    }
-    PowerGridWidget.createRelayUi = createRelayUi;
-})(PowerGridWidget || (PowerGridWidget = {}));
-// main - entry point
-(function main() {
-    var doc = window.document;
-    PowerGridWidgetHelper.onReady(doc, function () {
-        var gridUi = PowerGridWidgetHelper.newInst(doc, doc.getElementsByClassName("power-grid-widget")[0], { mapName: "defaultMap1" }, PowerGridWidget.addSvgMap);
-    });
-})();
-module.exports = PowerGridWidget;
-
-},{"./PowerGridWidgetHelper":8}],8:[function(require,module,exports){
-"use strict";
-
-var PowerGrid = require("./PowerGrid");
-var PowerGridWidgetHelper;
-(function (PowerGridWidgetHelper) {
-    function newInst(doc, container, settings, buildSvgFunc) {
-        var grid = new PowerGrid();
-        var map = PowerGrid.maps[settings.mapName];
-        //var size = grid.createPowerGrid(map);
-        var size = { width: map[0].length, height: map.length };
-        var gs = {
-            xCount: size.width,
-            zCount: size.height,
-            xSize: 10,
-            zSize: 10
-        };
-        //addSvgMap(doc, container, grid.relays, grid.junctions, gs);
-        var jncs = map.reduce(function (m, ln, z) {
-            ln.split("").forEach(function (s, x) {
-                if (s === "+") {
-                    m.push({ junctionId: null, location: { x: x, y: 0, z: z } });
-                }
-            });
-            return m;
-        }, []);
-        var svgContainer = container.getElementsByClassName("map-display")[0];
-        buildSvgFunc(doc, svgContainer, [], jncs, gs);
-    }
-    PowerGridWidgetHelper.newInst = newInst;
-    function onReady(document, func) {
-        if (typeof document === "function") {
-            func = document;
-            document = undefined;
-        }
-        var doc = document || window.document;
-        function ready(func) {
-            if (doc.readyState !== "loading") {
-                func();
-            } else {
-                doc.addEventListener("DOMContentLoaded", func);
-            }
-        }
-        ready(func);
-    }
-    PowerGridWidgetHelper.onReady = onReady;
-})(PowerGridWidgetHelper || (PowerGridWidgetHelper = {}));
-module.exports = PowerGridWidgetHelper;
-
-},{"./PowerGrid":6}],9:[function(require,module,exports){
-"use strict";
-
-var assert = require("assert");
-var PowerRelay;
-(function (PowerRelay) {
-    var JunctionId;
-    (function (JunctionId) {
-        function fromDb(id) {
-            return id;
-        }
-        JunctionId.fromDb = fromDb;
-    })(JunctionId = PowerRelay.JunctionId || (PowerRelay.JunctionId = {}));
-    var RelayId;
-    (function (RelayId) {
-        function fromDb(id) {
-            return id;
-        }
-        RelayId.fromDb = fromDb;
-    })(RelayId = PowerRelay.RelayId || (PowerRelay.RelayId = {}));
-    var Junction;
-    (function (Junction) {
-        function toMap(jns) {
-            return jns.reduce(function (r, n) {
-                var id = getJunctionId(n);
-                r[id] = { junctionId: JunctionId.fromDb(id), location: n.location };
-                return r;
-            }, {});
-        }
-        Junction.toMap = toMap;
-        function getJunctionId(jnc) {
-            return "Junction{" + jnc.location.x + "," + jnc.location.y + "," + jnc.location.z + "}";
-        }
-        Junction.getJunctionId = getJunctionId;
-    })(Junction = PowerRelay.Junction || (PowerRelay.Junction = {}));
-    var PowerRating;
-    (function (PowerRating) {
-        function getPowerRating() {
-            return { maxPower: 271, safeOperatePower: 139, standbyPower: 43 };
-        }
-        PowerRating.getPowerRating = getPowerRating;
-    })(PowerRating = PowerRelay.PowerRating || (PowerRelay.PowerRating = {}));
-    var Pwr;
-    (function (Pwr) {
-        function fromElectric(volts, amps) {
-            return volts * amps;
-        }
-        Pwr.fromElectric = fromElectric;
-    })(Pwr = PowerRelay.Pwr || (PowerRelay.Pwr = {}));
-    var Relay;
-    (function (Relay) {
-        function toMap(rls) {
-            return rls.reduce(function (r, n) {
-                var id = getRelayId(n);
-                r[id] = { relayId: RelayId.fromDb(id), powerRating: n.powerRating, path: n.path, srcJunctionId: JunctionId.fromDb(n.srcJunctionId), dstJunctionId: JunctionId.fromDb(n.dstJunctionId) };
-                return r;
-            }, {});
-        }
-        Relay.toMap = toMap;
-        function getRelayId(rly) {
-            return "Relay{" + rly.srcJunctionId + "-to-" + rly.dstJunctionId + "}";
-        }
-        Relay.getRelayId = getRelayId;
-    })(Relay = PowerRelay.Relay || (PowerRelay.Relay = {}));
-    function shortestRelay(relays) {
-        var min;
-        var minDistance = Number.MAX_SAFE_INTEGER;
-        var ds;
-        for (var i = 0, size = relays.length; i < size; i++) {
-            var rly = relays[i];
-            if (!min || minDistance > (ds = rly.path.length)) {
-                min = rly;
-                minDistance = ds;
-            }
-        }
-    }
-    /**
-     * @param lines assume each string is along the X-axis and the array of lines are along the Z-axis, 1x1 is the top-left corner
-     */
-    function diagramToJunctionRelays(y, lines) {
-        assert(lines && lines.length > 0, "atleast 1 line required");
-        var rlys = [];
-        var jncs = [];
-        var mapLines = lines.map(function (ln) {
-            return ln.split("");
-        }); // [z][x]
-        var zCount = mapLines.length;
-        var xCount = mapLines[0].length;
-        forEach2d(mapLines, function (ch, z, x, chs) {
-            assert(chs.length === xCount, "all lines must be equal length");
-            if (isJunction(ch, z, x, chs)) {
-                jncs.push(newJunction(x, y, z, mapLines));
-            }
-        });
-        var takenJncConns = []; // [z, x]
-        jncs.forEach(function (jn) {
-            var _a = jn.location,
-                x = _a.x,
-                z = _a.z;
-            walkConnections(x, z, xCount, zCount, mapLines, takenJncConns);
-        });
-        return { junctions: jncs, relays: rlys, size: { width: xCount, height: zCount } };
-    }
-    PowerRelay.diagramToJunctionRelays = diagramToJunctionRelays;
-    function isJunction(ch, z, x, lines) {
-        return ch === "+";
-    }
-    function newJunction(x, y, z, ary) {
-        return {
-            location: { x: x, y: y, z: z }
-        };
-    }
-    // given a junction, start looking down each path
-    function walkConnections(x, z, xCount, zCount, ary, jncConnsUsed) {
-        // TODO keep track of already used junction connections and don't re-walk them
-        for (var i = 0, size = jncConnsUsed.length; i < size; i++) {
-            var jnc = jncConnsUsed[i];
-            if (jnc[0] === z && jnc[1] === x) {
-                return;
-            }
-        }
-        jncConnsUsed.push([z, x]);
-        function toRelayRaw(jncPath) {
-            return {
-                powerRating: PowerRating.getPowerRating(),
-                path: jncPath.points.map(function (p) {
-                    return { x: p.x, y: 0, z: p.z };
-                }),
-                srcJunctionId: Junction.getJunctionId({ location: { x: x, y: 0, z: z } }),
-                dstJunctionId: Junction.getJunctionId({ location: jncPath.junction })
-            };
-        }
-        var xOrig = x;
-        var zOrig = z;
-        var res = [];
-        function createJunction(x, z) {
-            res.push(toRelayRaw(walkToJunction(x, z, xCount, zCount, ary, '+', xOrig, zOrig)));
-        }
-        forEachValidDirection(x, z, xCount, zCount, {
-            top: createJunction,
-            topRight: createJunction,
-            right: createJunction,
-            bottomRight: createJunction,
-            bottom: createJunction,
-            bottomLeft: createJunction,
-            left: createJunction,
-            topLeft: createJunction
-        });
-        return res;
-    }
-    /** given a starting point on a path, walk to the end
-     * @return the exclusive end [x, z] coordinate
-     */
-    function walkToJunction(x, z, xCount, zCount, ary, endChar, xSrcJunc, zSrcJunc) {
-        var xPrev = xSrcJunc;
-        var zPrev = zSrcJunc;
-        var dst = [];
-        do {
-            var dstLen = dst.length;
-            var res = pipeFrom(x, z, xCount, zCount, ary, endChar, xPrev, zPrev, dst);
-            if (dstLen === (dstLen = dst.length)) {
-                // dead-end, no new pipe found
-                break;
-            }
-            xPrev = x;
-            zPrev = z;
-            x = dst[dstLen - 1].x;
-            z = dst[dstLen - 1].z;
-        } while (res == null && x > -1 && z > -1 && x < xCount && z < zCount);
-        // TODO res may be null
-        return {
-            connectionDirection: { x: xSrcJunc - x, y: 0, z: zSrcJunc - z },
-            junction: { x: res.x, y: 0, z: res.z },
-            points: dst
-        };
-    }
-    /** fill 'dst' array with x,z pairs
-     * @return whether a endChar was found
-     */
-    function pipeFrom(x, z, xCount, zCount, ary, endChar, xPrev, zPrev, dst) {
-        var notExp = {
-            '-': ['|', '/', '\\'],
-            '|': ['-', '/', '\\'],
-            '/': ['-', '|', '\\'],
-            '\\': ['-', '|', '/']
-        };
-        function checkAdjacent(expect, xx, zz, ary, notExpect) {
-            if (xx === xPrev && zz === zPrev) {
-                return null;
-            }
-            var ch = ary[zz][xx];
-            if (ch === expect) {
-                dst.push({ x: xx, z: zz });
-            } else if (notExpect.indexOf(ch) > -1) {
-                throw invalidSymbolAt(xx, zz, ary, expect);
-            } else if (ch === endChar) {
-                return { x: xx, z: zz };
-            }
-            return null;
-        }
-        var res = forEachValidDirection(x, z, xCount, zCount, {
-            top: function top(x, z) {
-                return checkAdjacent('|', x, z, ary, notExp['|']);
-            },
-            topRight: function topRight(x, z) {
-                return checkAdjacent('/', x, z, ary, notExp['/']);
-            },
-            right: function right(x, z) {
-                return checkAdjacent('-', x, z, ary, notExp['-']);
-            },
-            bottomRight: function bottomRight(x, z) {
-                return checkAdjacent('\\', x, z, ary, notExp['\\']);
-            },
-            bottom: function bottom(x, z) {
-                return checkAdjacent('|', x, z, ary, notExp['|']);
-            },
-            bottomLeft: function bottomLeft(x, z) {
-                return checkAdjacent('/', x, z, ary, notExp['/']);
-            },
-            left: function left(x, z) {
-                return checkAdjacent('-', x, z, ary, notExp['-']);
-            },
-            topLeft: function topLeft(x, z) {
-                return checkAdjacent('\\', x, z, ary, notExp['\\']);
-            }
-        });
-        return res;
-    }
-    /** Given a point on a grid of given size and handlers for 8 directions (horizontal, vertical, diagonal),
-     * call the directional handlers for adjacent cells which are still within grid bounds.
-     * @param x the 0-based X position of the point being checked
-     * @param z the 0-based Z position of the point being checked
-     * @param xCount the exclusive width (X) size of the grid
-     * @param zCount the exclusive depth (Z) size of the grid
-     * @param dirHandlers the map associating directions with handler functions (all properties must not be null)
-     * @return the first handler return value other than undefined (handlers are called based on the above described criteria)
-     */
-    function forEachValidDirection(x, z, xCount, zCount, dirHandlers) {
-        if (x > 0) {
-            if (z > 0) {
-                // = = .
-                // = + .
-                // . . .
-                var res = dirHandlers.left(x - 1, z);
-                if (res !== undefined) {
-                    return res;
-                }
-                var res = dirHandlers.topLeft(x - 1, z - 1);
-                if (res !== undefined) {
-                    return res;
-                }
-                var res = dirHandlers.top(x, z - 1);
-                if (res !== undefined) {
-                    return res;
-                }
-            }
-            if (z < zCount - 1) {
-                // . = =
-                // . + =
-                // . . .
-                var res = dirHandlers.top(x, z - 1);
-                if (res !== undefined) {
-                    return res;
-                }
-                var res = dirHandlers.topRight(x + 1, z - 1);
-                if (res !== undefined) {
-                    return res;
-                }
-                var res = dirHandlers.right(x + 1, z);
-                if (res !== undefined) {
-                    return res;
-                }
-            }
-        }
-        if (x < xCount - 1) {
-            if (z > 0) {
-                // . . .
-                // = + .
-                // = = .
-                var res = dirHandlers.bottom(x, z + 1);
-                if (res !== undefined) {
-                    return res;
-                }
-                var res = dirHandlers.bottomLeft(x - 1, z + 1);
-                if (res !== undefined) {
-                    return res;
-                }
-                var res = dirHandlers.left(x - 1, z);
-                if (res !== undefined) {
-                    return res;
-                }
-            }
-            if (z < zCount - 1) {
-                // . . .
-                // . + =
-                // . = =
-                var res = dirHandlers.bottom(x, z + 1);
-                if (res !== undefined) {
-                    return res;
-                }
-                var res = dirHandlers.bottomRight(x + 1, z + 1);
-                if (res !== undefined) {
-                    return res;
-                }
-                var res = dirHandlers.right(x + 1, z);
-                if (res !== undefined) {
-                    return res;
-                }
-            }
-        }
-        return undefined;
-    }
-    PowerRelay.forEachValidDirection = forEachValidDirection;
-    function forEach2d(tArys, func) {
-        for (var i1 = 0, size1 = tArys.length; i1 < size1; i1++) {
-            var ts = tArys[i1];
-            for (var i2 = 0, size2 = ts.length; i2 < size2; i2++) {
-                func(ts[i2], i1, i2, ts, tArys);
-            }
-        }
-    }
-    PowerRelay.forEach2d = forEach2d;
-    function invalidSymbolAt(x, z, ary, expected) {
-        return new Error("invalid symbol [" + ary[z][x] + " at x=" + x + ", z=" + z + (expected ? ", " + expected : ""));
-    }
-    PowerRelay.invalidSymbolAt = invalidSymbolAt;
-})(PowerRelay || (PowerRelay = {}));
-module.exports = PowerRelay;
-
-},{"assert":1}]},{},[7])
+},{"./support/isBuffer":9,"_process":7,"inherits":8}]},{},[3])
 //# sourceMappingURL=app-babel-babelify.js.map

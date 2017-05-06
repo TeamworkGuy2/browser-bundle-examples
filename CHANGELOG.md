@@ -4,6 +4,12 @@ This project does its best to adhere to [Semantic Versioning](http://semver.org/
 
 
 --------
+### [0.5.1](https://github.com/TeamworkGuy2/browser-bundle-examples/commit/4b5a2c841431d77226cd280961fbee836e03528c) - 2017-05-06
+#### Changed
+* Updated readme.md
+
+
+--------
 ### [0.5.0](https://github.com/TeamworkGuy2/browser-bundle-examples/commit/0a2d247d002bc591344def597cd81a927c5cfac8) - 2017-05-06
 #### Changed
 * Updated to ts-bundlify@0.5.0

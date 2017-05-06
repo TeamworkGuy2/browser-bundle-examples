@@ -1,6 +1,6 @@
 {
   "name": "browser-bundle-examples",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Example projects using Browserify, Traceur, gulp.js, etc. to build/bundle javascript code",
   "devDependencies": {
     "babel-core": "~6.24.1",

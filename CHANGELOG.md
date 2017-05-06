@@ -4,7 +4,24 @@ This project does its best to adhere to [Semantic Versioning](http://semver.org/
 
 
 --------
-### [0.3.1](N/A) - 2016-07-19
+### [0.5.0](N/A) - 2017-05-06
+#### Changed
+* Updated to ts-bundlify@0.5.0
+* bundle specific prelude source strings
+
+
+--------
+### [0.4.0](https://github.com/TeamworkGuy2/browser-bundle-examples/commit/b7982386b3161669aab7cc4bed0adc23869585d6) - 2017-05-02
+#### Changed
+* Extensive gulpfile.js modifications to test Browserify multiple output bundles with uglify
+* Renamed directory example1 -> example-code
+
+#### Removed
+* build-scripts BrowserifyHelper, FileUtil, LogUtil, PathUtil, StringUtil, TypeScriptUtil, and others, these exist in [ts-bundlify](https://github.com/TeamworkGuy2/ts-bundlify)
+
+
+--------
+### [0.3.1](https://github.com/TeamworkGuy2/browser-bundle-examples/commit/c24cdd57ae763b8a2df3f159ce536ed1277f4503) - 2016-07-19
 #### Changed
 Few minor changes to prep the project for live demo of build process using PowerGridWidget.js and then switching to PowerGridWidget.jsx
 

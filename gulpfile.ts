@@ -64,7 +64,7 @@ gulp.task("build", ["vendor"], function () {
         verbose,
         typescript: { includeHelpers: true }
     };
-    var browserifyOpts: Browserify.Options & BrowserPack.Options;
+    var browserifyOpts: Browserify.Options & BrowserPack.Options & { typescriptHelpers?: string };
     var bundleBldr = BundleBuilder.buildOptions(bundleOpts, (brwsOpts) => browserifyOpts = brwsOpts);
 
     // TODO testing in progress
@@ -89,17 +89,17 @@ gulp.task("build", ["vendor"], function () {
         case "uglify":
             BrowserMultiPack.overrideBrowserifyPack(bundleBldr, BundleBuilder.getBrowserify(), () => ({
                 bundles: [{
-                    dstFileName: "app-uglify.js"
+                    dstFileName: "app-uglify.js",
+                    prelude: browserifyOpts.prelude,
                 }, {
-                    dstFileName: "app-uglify-common.js"
+                    dstFileName: "app-uglify-common.js",
+                    prelude: browserifyOpts.typescriptHelpers + "var require = " + browserifyOpts.prelude,
+                    preludePath: "./_prelude-with-typescript-helpers.js",
                 }],
                 maxDestinations: 2,
-                destinationPicker: (row) => {
-                    return row.sourceFile.indexOf("power-grid") > -1 ? 0 : 1;
+                destinationPicker: (path) => {
+                    return path.indexOf("power-grid") > -1 ? 0 : 1;
                 },
-            }), () => ({
-                prelude: browserifyOpts.prelude,
-                preludePath: browserifyOpts.preludePath,
             }));
 
             bundleBldr

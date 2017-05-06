@@ -78,17 +78,17 @@ gulp.task("build", ["vendor"], function () {
         case "uglify":
             BrowserMultiPack.overrideBrowserifyPack(bundleBldr, BundleBuilder.getBrowserify(), function () { return ({
                 bundles: [{
-                        dstFileName: "app-uglify.js"
+                        dstFileName: "app-uglify.js",
+                        prelude: browserifyOpts.prelude,
                     }, {
-                        dstFileName: "app-uglify-common.js"
+                        dstFileName: "app-uglify-common.js",
+                        prelude: browserifyOpts.typescriptHelpers + "var require = " + browserifyOpts.prelude,
+                        preludePath: "./_prelude-with-typescript-helpers.js",
                     }],
                 maxDestinations: 2,
-                destinationPicker: function (row) {
-                    return row.sourceFile.indexOf("power-grid") > -1 ? 0 : 1;
+                destinationPicker: function (path) {
+                    return path.indexOf("power-grid") > -1 ? 0 : 1;
                 },
-            }); }, function () { return ({
-                prelude: browserifyOpts.prelude,
-                preludePath: browserifyOpts.preludePath,
             }); });
             bundleBldr
                 .transforms(function (browserify) { return [

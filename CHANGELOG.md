@@ -4,7 +4,13 @@ This project does its best to adhere to [Semantic Versioning](http://semver.org/
 
 
 --------
-### [0.5.1](https://github.com/TeamworkGuy2/browser-bundle-examples/commit/4b5a2c841431d77226cd280961fbee836e03528c) - 2017-05-06
+### [0.5.2](N/A) - 2017-05-09
+#### Changed
+* Update to TypeScript 2.3, add tsconfig.json, use @types/ definitions
+
+
+--------
+### [0.5.1](https://github.com/TeamworkGuy2/browser-bundle-examples/commit/ee4f80123680ce4b3114f7fa6322f7fc2530b736) - 2017-05-06
 #### Changed
 * Updated readme.md
 

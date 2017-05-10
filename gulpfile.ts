@@ -1,4 +1,5 @@
-﻿import stream = require("stream");
+﻿/// <reference path="../ts-bundlify/ts-bundlify-types.d.ts" />
+import stream = require("stream");
 import gulp = require("gulp");
 import gutil = require("gulp-util");
 import babelify = require("babelify");
@@ -64,7 +65,7 @@ gulp.task("build", ["vendor"], function () {
         verbose,
         typescript: { includeHelpers: true }
     };
-    var browserifyOpts: Browserify.Options & BrowserPack.Options & { typescriptHelpers?: string };
+    var browserifyOpts: browserify.Options & browserPack.Options & { typescriptHelpers?: string };
     var bundleBldr = BundleBuilder.buildOptions(bundleOpts, (brwsOpts) => browserifyOpts = brwsOpts);
 
     // TODO testing in progress

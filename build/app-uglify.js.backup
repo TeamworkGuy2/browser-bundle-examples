@@ -1,25 +1,37 @@
-(function outer(m,c,e){
-  function newReq(n,u){
-    if(!c[n]){
-      if(!m[n]){
-        var curReq=typeof require=="function"&&require;
-        if(!u&&curReq)return curReq(n,!0);
-        if(prevReq)return prevReq(n,!0);
-        var f=new Error("Cannot find module '"+n+"'");
-        throw f.code="MODULE_NOT_FOUND",f
-      }
-      var l=c[n]={exports:{}};
-      m[n][0].call(l.exports,function(x){        var d=m[n][1][x];        return newReq(d?d:x)      },l,l.exports,outer,m,c,e)
-    }
-    return c[n].exports
-  }
-  var prevReq=typeof require=="function"&&require;
-  for(var i=0;i<e.length;i++)newReq(e[i]);
-  return newReq
-})({1:[function(require,module,exports){
+/* TypeScript static helpers - inserted once, here.  Run TypeScript compiler with '--noEmitHelpers' option to prevent duplicate helpers being inserted into each bundled TypeScript file */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
+
+var require = (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 /** Utilities for 2-dimensional array iteration */
-
 var ForEachUtil;
 (function (ForEachUtil) {
     var dirDown = 1;
@@ -44,16 +56,19 @@ var ForEachUtil;
         if (x === xPrev && z === zPrev) {
             throw new Error("cannot determine direction since x,z and xPrev,zPrev are the same");
         }
-        var dir = z === zPrev ? x < xPrev ? dirLeft : dirRight /*left or right*/ : z > zPrev ? x > xPrev ? dirDownRight : x === xPrev ? dirDown : dirDownLeft : /*down-ish*/x > xPrev ? dirUpRight : x === xPrev ? dirUp : dirUpLeft /*up-ish*/;
+        var dir = z === zPrev ? (x < xPrev ? dirLeft : dirRight /*left or right*/) :
+            (z > zPrev ?
+                (x > xPrev ? dirDownRight : (x === xPrev ? dirDown : dirDownLeft)) /*down-ish*/ :
+                (x > xPrev ? dirUpRight : (x === xPrev ? dirUp : dirUpLeft)) /*up-ish*/);
         var ignore = ignoreBehindPoints;
-        var ignoreTop = ignore ? dir === dirDownRight || dir === dirDown || dir === dirDownLeft : false;
-        var ignoreTopRight = ignore ? dir === dirDown || dir === dirDownLeft || dir === dirLeft : false;
-        var ignoreRight = ignore ? dir === dirDownLeft || dir === dirLeft || dir === dirUpLeft : false;
-        var ignoreBottomRight = ignore ? dir === dirLeft || dir === dirUpLeft || dir === dirUp : false;
-        var ignoreBottom = ignore ? dir === dirUpLeft || dir === dirUp || dir === dirUpRight : false;
-        var ignoreBottomLeft = ignore ? dir === dirUp || dir === dirUpRight || dir === dirRight : false;
-        var ignoreLeft = ignore ? dir === dirUpRight || dir === dirRight || dir === dirDownRight : false;
-        var ignoreTopLeft = ignore ? dir === dirRight || dir === dirDownRight || dir === dirDown : false;
+        var ignoreTop = ignore ? (dir === dirDownRight || dir === dirDown || dir === dirDownLeft) : false;
+        var ignoreTopRight = ignore ? (dir === dirDown || dir === dirDownLeft || dir === dirLeft) : false;
+        var ignoreRight = ignore ? (dir === dirDownLeft || dir === dirLeft || dir === dirUpLeft) : false;
+        var ignoreBottomRight = ignore ? (dir === dirLeft || dir === dirUpLeft || dir === dirUp) : false;
+        var ignoreBottom = ignore ? (dir === dirUpLeft || dir === dirUp || dir === dirUpRight) : false;
+        var ignoreBottomLeft = ignore ? (dir === dirUp || dir === dirUpRight || dir === dirRight) : false;
+        var ignoreLeft = ignore ? (dir === dirUpRight || dir === dirRight || dir === dirDownRight) : false;
+        var ignoreTopLeft = ignore ? (dir === dirRight || dir === dirDownRight || dir === dirDown) : false;
         var topLeftRan = false;
         var topRightRan = false;
         var bottomLeftRan = false;
@@ -175,16 +190,19 @@ var ForEachUtil;
         if (x === xPrev && z === zPrev) {
             throw new Error("cannot determine direction since x,z and xPrev,zPrev are the same");
         }
-        var dir = z === zPrev ? x < xPrev ? dirLeft : dirRight /*left or right*/ : z > zPrev ? x > xPrev ? dirDownRight : x === xPrev ? dirDown : dirDownLeft : /*down-ish*/x > xPrev ? dirUpRight : x === xPrev ? dirUp : dirUpLeft /*up-ish*/;
+        var dir = z === zPrev ? (x < xPrev ? dirLeft : dirRight /*left or right*/) :
+            (z > zPrev ?
+                (x > xPrev ? dirDownRight : (x === xPrev ? dirDown : dirDownLeft)) /*down-ish*/ :
+                (x > xPrev ? dirUpRight : (x === xPrev ? dirUp : dirUpLeft)) /*up-ish*/);
         var ignore = ignoreBehindPoints;
-        var ignoreTop = ignore ? dir === dirDownRight || dir === dirDown || dir === dirDownLeft : false;
-        var ignoreTopRight = ignore ? dir === dirDown || dir === dirDownLeft || dir === dirLeft : false;
-        var ignoreRight = ignore ? dir === dirDownLeft || dir === dirLeft || dir === dirUpLeft : false;
-        var ignoreBottomRight = ignore ? dir === dirLeft || dir === dirUpLeft || dir === dirUp : false;
-        var ignoreBottom = ignore ? dir === dirUpLeft || dir === dirUp || dir === dirUpRight : false;
-        var ignoreBottomLeft = ignore ? dir === dirUp || dir === dirUpRight || dir === dirRight : false;
-        var ignoreLeft = ignore ? dir === dirUpRight || dir === dirRight || dir === dirDownRight : false;
-        var ignoreTopLeft = ignore ? dir === dirRight || dir === dirDownRight || dir === dirDown : false;
+        var ignoreTop = ignore ? (dir === dirDownRight || dir === dirDown || dir === dirDownLeft) : false;
+        var ignoreTopRight = ignore ? (dir === dirDown || dir === dirDownLeft || dir === dirLeft) : false;
+        var ignoreRight = ignore ? (dir === dirDownLeft || dir === dirLeft || dir === dirUpLeft) : false;
+        var ignoreBottomRight = ignore ? (dir === dirLeft || dir === dirUpLeft || dir === dirUp) : false;
+        var ignoreBottom = ignore ? (dir === dirUpLeft || dir === dirUp || dir === dirUpRight) : false;
+        var ignoreBottomLeft = ignore ? (dir === dirUp || dir === dirUpRight || dir === dirRight) : false;
+        var ignoreLeft = ignore ? (dir === dirUpRight || dir === dirRight || dir === dirDownRight) : false;
+        var ignoreTopLeft = ignore ? (dir === dirRight || dir === dirDownRight || dir === dirDown) : false;
         var topLeftRan = false;
         var topRightRan = false;
         var bottomLeftRan = false;
@@ -306,12 +324,12 @@ module.exports = ForEachUtil;
 
 },{}],2:[function(require,module,exports){
 "use strict";
-
 var PowerRelay = require("./PowerRelay");
 var Junction = PowerRelay.Junction;
 var Relay = PowerRelay.Relay;
-var PowerGrid = function () {
-    function PowerGrid() {}
+var PowerGrid = (function () {
+    function PowerGrid() {
+    }
     PowerGrid.prototype.createPowerGrid = function (map) {
         var diagramParts = PowerRelay.diagramToJunctionRelays(0, map);
         this.junctions = diagramParts.junctions;
@@ -335,7 +353,7 @@ var PowerGrid = function () {
         this.junctionCache = Junction.toMap(jncs);
         return {
             width: map[0].length,
-            height: map.length
+            height: map.length,
         };
     };
     PowerGrid.prototype.getJunction = function (id) {
@@ -345,16 +363,49 @@ var PowerGrid = function () {
         return this.relayCache[id];
     };
     return PowerGrid;
-}();
+}());
 PowerGrid.maps = {
-    defaultMap1: ["                                                                                ", "                                                                                ", "        +                                        +                         +    ", "       /                                         |                        /     ", "      /                 +--------+---------------+                       +      ", "     |                 /         |               |                       |      ", "     +                +          |               +-----------+-----------+      ", "     |                           |                                       |      ", "     +---------------------------+                                       |      ", "                                             +--\\                        |      ", "                                                 +-----------------------+      ", "                       +-------------------------+                              ", "                      /                          |                              ", "                     +                           +                              ", "                                                                                ", "                                                                                "],
-    hds: ["                                                                                ", "                                                                                ", "    +       +      +  +  +           + + + + +                                  ", "                                                                                ", "    +       +      +       +       +                                            ", "                                                                                ", "    +       +      +         +     +                                            ", "                                                                                ", "    + + + + +      +         +       + + + +                                    ", "                                                                                ", "    +       +      +         +               +                                  ", "                                                                                ", "    +       +      +       +                 +                                  ", "                                                                                ", "    +       +      +  +  +         + + + + +                                    ", "                                                                                "]
+    defaultMap1: [
+        "                                                                                ",
+        "                                                                                ",
+        "        +                                        +                         +    ",
+        "       /                                         |                        /     ",
+        "      /                 +--------+---------------+                       +      ",
+        "     |                 /         |               |                       |      ",
+        "     +                +          |               +-----------+-----------+      ",
+        "     |                           |                                       |      ",
+        "     +---------------------------+                                       |      ",
+        "                                             +--\\                        |      ",
+        "                                                 +-----------------------+      ",
+        "                       +-------------------------+                              ",
+        "                      /                          |                              ",
+        "                     +                           +                              ",
+        "                                                                                ",
+        "                                                                                ",
+    ],
+    hds: [
+        "                                                                                ",
+        "                                                                                ",
+        "    +       +      +  +  +           + + + + +                                  ",
+        "                                                                                ",
+        "    +       +      +       +       +                                            ",
+        "                                                                                ",
+        "    +       +      +         +     +                                            ",
+        "                                                                                ",
+        "    + + + + +      +         +       + + + +                                    ",
+        "                                                                                ",
+        "    +       +      +         +               +                                  ",
+        "                                                                                ",
+        "    +       +      +       +                 +                                  ",
+        "                                                                                ",
+        "    +       +      +  +  +         + + + + +                                    ",
+        "                                                                                ",
+    ],
 };
 module.exports = PowerGrid;
 
 },{"./PowerRelay":5}],3:[function(require,module,exports){
 "use strict";
-
 var PowerGridWidgetHelper = require("./PowerGridWidgetHelper");
 var PowerGridWidget;
 (function (PowerGridWidget) {
@@ -402,12 +453,11 @@ var PowerGridWidget;
     PowerGridWidgetHelper.onReady(doc, function () {
         var gridUi = PowerGridWidgetHelper.newInst(doc, doc.getElementsByClassName("power-grid-widget")[0], { mapName: "defaultMap1" }, PowerGridWidget.addSvgMap);
     });
-})();
+}());
 module.exports = PowerGridWidget;
 
 },{"./PowerGridWidgetHelper":4}],4:[function(require,module,exports){
 "use strict";
-
 var PowerGrid = require("./PowerGrid");
 var PowerGridWidgetHelper;
 (function (PowerGridWidgetHelper) {
@@ -420,7 +470,7 @@ var PowerGridWidgetHelper;
             xCount: size.width,
             zCount: size.height,
             xSize: 10,
-            zSize: 10
+            zSize: 10,
         };
         //addSvgMap(doc, container, grid.relays, grid.junctions, gs);
         var svgContainer = container.getElementsByClassName("map-display")[0];
@@ -428,9 +478,7 @@ var PowerGridWidgetHelper;
     }
     PowerGridWidgetHelper.newInst = newInst;
     function relayToSvgPointsAttr(relay, pg, gs) {
-        var pointToPx = function pointToPx(p) {
-            return gs.xSize * (p.x + 0.5) + ',' + gs.zSize * (p.z + 0.5);
-        };
+        var pointToPx = function (p) { return (gs.xSize * (p.x + 0.5)) + ',' + (gs.zSize * (p.z + 0.5)); };
         var points = relay.path.map(pointToPx);
         var srcJnc = pg.getJunction(relay.srcJunctionId);
         points.unshift(pointToPx(srcJnc.location));
@@ -448,7 +496,8 @@ var PowerGridWidgetHelper;
         function ready(func) {
             if (doc.readyState !== "loading") {
                 func();
-            } else {
+            }
+            else {
                 doc.addEventListener("DOMContentLoaded", func);
             }
         }
@@ -460,37 +509,28 @@ module.exports = PowerGridWidgetHelper;
 
 },{"./PowerGrid":2}],5:[function(require,module,exports){
 "use strict";
-
 var assert = require("assert");
 var ForEachUtil = require("../ForEachUtil");
 var PowerRelay;
 (function (PowerRelay) {
     var PowerRating;
     (function (PowerRating) {
-        function getPowerRating() {
-            return { maxPower: 271, safeOperatePower: 139, standbyPower: 43 };
-        }
+        function getPowerRating() { return { maxPower: 271, safeOperatePower: 139, standbyPower: 43 }; }
         PowerRating.getPowerRating = getPowerRating;
     })(PowerRating = PowerRelay.PowerRating || (PowerRelay.PowerRating = {}));
     var Pwr;
     (function (Pwr) {
-        function fromElectric(volts, amps) {
-            return volts * amps;
-        }
+        function fromElectric(volts, amps) { return (volts * amps); }
         Pwr.fromElectric = fromElectric;
     })(Pwr = PowerRelay.Pwr || (PowerRelay.Pwr = {}));
     var JunctionId;
     (function (JunctionId) {
-        function fromDb(id) {
-            return id;
-        }
+        function fromDb(id) { return id; }
         JunctionId.fromDb = fromDb;
     })(JunctionId = PowerRelay.JunctionId || (PowerRelay.JunctionId = {}));
     var RelayId;
     (function (RelayId) {
-        function fromDb(id) {
-            return id;
-        }
+        function fromDb(id) { return id; }
         RelayId.fromDb = fromDb;
     })(RelayId = PowerRelay.RelayId || (PowerRelay.RelayId = {}));
     var Junction;
@@ -500,14 +540,14 @@ var PowerRelay;
                 var id = getJunctionId(n);
                 r[id] = {
                     junctionId: JunctionId.fromDb(id),
-                    location: n.location
+                    location: n.location,
                 };
                 return r;
             }, {});
         }
         Junction.toMap = toMap;
         function getJunctionId(jnc) {
-            return "Junction{" + jnc.location.x + "," + jnc.location.y + "," + jnc.location.z + "}";
+            return ("Junction{" + jnc.location.x + "," + jnc.location.y + "," + jnc.location.z + "}");
         }
         Junction.getJunctionId = getJunctionId;
     })(Junction = PowerRelay.Junction || (PowerRelay.Junction = {}));
@@ -521,14 +561,14 @@ var PowerRelay;
                     powerRating: n.powerRating,
                     path: n.path,
                     srcJunctionId: JunctionId.fromDb(n.srcJunctionId),
-                    dstJunctionId: JunctionId.fromDb(n.dstJunctionId)
+                    dstJunctionId: JunctionId.fromDb(n.dstJunctionId),
                 };
                 return r;
             }, {});
         }
         Relay.toMap = toMap;
         function getRelayId(rly) {
-            return "Relay{" + rly.srcJunctionId + "-to-" + rly.dstJunctionId + "}";
+            return ("Relay{" + rly.srcJunctionId + "-to-" + rly.dstJunctionId + "}");
         }
         Relay.getRelayId = getRelayId;
     })(Relay = PowerRelay.Relay || (PowerRelay.Relay = {}));
@@ -552,9 +592,7 @@ var PowerRelay;
         assert(lines && lines.length > 0, "atleast 1 line required");
         var rlys = [];
         var jncs = [];
-        var mapLines = lines.map(function (ln) {
-            return ln.split("");
-        }); // [z][x]
+        var mapLines = lines.map(function (ln) { return ln.split(""); }); // [z][x]
         var zCount = mapLines.length;
         var xCount = mapLines[0].length;
         ForEachUtil.forEach2d(mapLines, function (ch, z, x, chs) {
@@ -565,9 +603,7 @@ var PowerRelay;
         });
         var takenJncConns = [];
         jncs.forEach(function (jn) {
-            var _a = jn.location,
-                x = _a.x,
-                z = _a.z;
+            var _a = jn.location, x = _a.x, z = _a.z;
             var jncRelays = walkConnections(x, z, xCount, zCount, mapLines, takenJncConns);
             Array.prototype.push.apply(rlys, jncRelays);
         });
@@ -603,11 +639,9 @@ var PowerRelay;
             var relay = {
                 relayId: null,
                 powerRating: PowerRating.getPowerRating(),
-                path: jncPath.points.map(function (p) {
-                    return { x: p.x, y: 0, z: p.z };
-                }),
+                path: jncPath.points.map(function (p) { return ({ x: p.x, y: 0, z: p.z }); }),
                 srcJunctionId: Junction.getJunctionId({ location: { x: x, y: 0, z: z } }),
-                dstJunctionId: Junction.getJunctionId({ location: jncPath.junction })
+                dstJunctionId: Junction.getJunctionId({ location: jncPath.junction }),
             };
             relay.relayId = Relay.getRelayId(relay);
             return relay;
@@ -629,7 +663,7 @@ var PowerRelay;
             bottom: createRelayPath,
             bottomLeft: createRelayPath,
             left: createRelayPath,
-            topLeft: createRelayPath
+            topLeft: createRelayPath,
         });
         return relays;
     }
@@ -638,7 +672,7 @@ var PowerRelay;
      */
     function walkToJunction(x, z, xCount, zCount, board, endChar, xStartJunc, zStartJunc, ignorePointsBehind) {
         // initialize with the current point
-        var dst = [{ x: x, z: z }];
+        var dst = [{ x: x, z: z, }];
         var xPrev = xStartJunc;
         var zPrev = zStartJunc;
         do {
@@ -661,7 +695,7 @@ var PowerRelay;
         return {
             connectionDirection: { x: xStartJunc - x, y: 0, z: zStartJunc - z },
             junction: { x: res.x, y: 0, z: res.z },
-            points: dst
+            points: dst,
         };
     }
     /** Check for valid next steps along the path and push the x,z pairs into 'dst'
@@ -675,36 +709,22 @@ var PowerRelay;
             var ch = board[zz][xx];
             if (ch === expect || ch === expect2 || ch === expect3) {
                 dst.push({ x: xx, z: zz });
-            } else if (notExpect === ch) {} else if (ch === endChar) {
+            }
+            else if (notExpect === ch) { }
+            else if (ch === endChar) {
                 return { x: xx, z: zz };
             }
             return null;
         }
         var res = ForEachUtil.forEachDirection(x, z, xCount, zCount, {
-            top: function top(x, z) {
-                return checkAdjacent('|', '/', '\\', x, z, '-');
-            },
-            topRight: function topRight(x, z) {
-                return checkAdjacent('/', '|', '-', x, z, '\\');
-            },
-            right: function right(x, z) {
-                return checkAdjacent('-', '/', '\\', x, z, '|');
-            },
-            bottomRight: function bottomRight(x, z) {
-                return checkAdjacent('\\', '|', '-', x, z, '/');
-            },
-            bottom: function bottom(x, z) {
-                return checkAdjacent('|', '/', '\\', x, z, '-');
-            },
-            bottomLeft: function bottomLeft(x, z) {
-                return checkAdjacent('/', '|', '-', x, z, '\\');
-            },
-            left: function left(x, z) {
-                return checkAdjacent('-', '/', '\\', x, z, '|');
-            },
-            topLeft: function topLeft(x, z) {
-                return checkAdjacent('\\', '|', '-', x, z, '//');
-            }
+            top: function (x, z) { return checkAdjacent('|', '/', '\\', x, z, '-'); },
+            topRight: function (x, z) { return checkAdjacent('/', '|', '-', x, z, '\\'); },
+            right: function (x, z) { return checkAdjacent('-', '/', '\\', x, z, '|'); },
+            bottomRight: function (x, z) { return checkAdjacent('\\', '|', '-', x, z, '/'); },
+            bottom: function (x, z) { return checkAdjacent('|', '/', '\\', x, z, '-'); },
+            bottomLeft: function (x, z) { return checkAdjacent('/', '|', '-', x, z, '\\'); },
+            left: function (x, z) { return checkAdjacent('-', '/', '\\', x, z, '|'); },
+            topLeft: function (x, z) { return checkAdjacent('\\', '|', '-', x, z, '//'); },
         }, ignorePointsBehind, xPrev, zPrev);
         return res;
     }
@@ -2020,4 +2040,4 @@ function hasOwnProperty(obj, prop) {
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
 },{"./support/isBuffer":9,"_process":7,"inherits":8}]},{},[3])
-//# sourceMappingURL=app-babel-babelify.js.map
+//# sourceMappingURL=app-uglify.js.map
